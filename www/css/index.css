@@ -116,3 +116,24 @@ h1 {
         background-image:linear-gradient(to bottom, #585858 0%, #1B1B1B 51%);
     }
 }
+
+/* Transições suaves para telas SPA */
+.app-screen {
+    transition: opacity 240ms ease, transform 240ms ease;
+    will-change: opacity, transform;
+}
+.app-screen[style*="display:none"] {
+    opacity: 0;
+    transform: translateX(8px);
+}
+.app-screen[style*="display:"] {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Spinner no header */
+#loadingSpinner { display: none; }
+
+/* Ajustes responsivos para títulos */
+#page-title { font-size: 1.05rem; margin: 0; }
+

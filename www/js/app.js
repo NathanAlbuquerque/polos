@@ -3,45 +3,105 @@
 
 document.addEventListener('deviceready', onDeviceReady, false);
 
+let navigationHistory = ['screen-home'];
+let currentScreen = 'screen-home';
+
 function onDeviceReady() {
     console.log('Cordova ready');
-    console.log('Platform: ' + device.platform);
-    console.log('OS Version: ' + device.version);
+    try { console.log('Platform: ' + device.platform); console.log('OS Version: ' + device.version); } catch (e) {}
 
     // Inicializar banco de dados SQLite
     initializeDatabase();
 
-    // Ajustes da tela de cadastro
+    // Ajustes da tela de cadastro (mascara e flatpickr)
     initializePoloForm();
 
-    // Renderizar dashboard inicial
-    showScreen('dashboard');
+    // Formulário de novo polo
+    const form = document.getElementById('formNovoPolo');
+    if (form) {
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            inserirNovoPolo();
+        });
+    }
+
+    // Hardware backbutton (Android)
+    document.addEventListener('backbutton', function (ev) {
+        ev.preventDefault();
+        if (navigationHistory.length > 1) {
+            goBack();
+        }
+    }, false);
+
+    // Mostrar tela inicial
+    navigateTo('screen-home', { replace: true });
 }
 
 // ===== GERENCIAMENTO DE TELAS (SPA) =====
-function showScreen(screenId) {
-    // Ocultar todas as telas
-    document.querySelectorAll('section').forEach(section => {
-        section.classList.add('d-none');
-    });
+function navigateTo(screenId, opts) {
+    opts = opts || {};
 
-    // Mostrar tela solicitada
-    const screen = document.getElementById(screenId);
-    if (screen) {
-        screen.classList.remove('d-none');
+    if (!screenId) return;
+    if (screenId === currentScreen && !opts.force) return;
 
-        // Atualizar título da navbar
-        const screenTitle = screen.getAttribute('data-title') || 'Gestor de Polos';
-        document.getElementById('navbarTitle').textContent = screenTitle;
+    const prevId = currentScreen;
+    const prev = document.getElementById(prevId);
+    const next = document.getElementById(screenId);
 
-        // Mostrar/ocultar botão voltar conforme apropriado
-        const backBtn = document.getElementById('backBtn');
-        backBtn.classList.toggle('d-none', screenId === 'dashboard');
+    // Transição simples
+    if (prev) {
+        prev.style.display = 'none';
     }
+
+    if (next) {
+        next.style.display = '';
+
+        // Atualizar título dinâmico
+        const screenTitle = next.getAttribute('data-title') || 'Gestor de Polos';
+        const pageTitle = document.getElementById('page-title');
+        if (pageTitle) pageTitle.textContent = screenTitle;
+
+        // Mostrar/ocultar botão voltar
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            backBtn.style.display = (screenId === 'screen-home') ? 'none' : '';
+        }
+
+        // Carregar dados quando necessário
+        if (screenId === 'screen-polos-grid') {
+            renderPolos();
+        }
+        if (screenId === 'screen-home') {
+            updateCounts();
+        }
+    }
+
+    // Histórico de navegação
+    if (!opts.replace) {
+        navigationHistory.push(screenId);
+    }
+
+    currentScreen = screenId;
 }
 
 function goBack() {
-    showScreen('dashboard');
+    // Remover a tela atual do histórico
+    navigationHistory.pop();
+    const previous = navigationHistory[navigationHistory.length - 1] || 'screen-home';
+    navigateTo(previous, { replace: true });
+}
+
+// Compatibilidade: adapter para chamadas antigas showScreen('dashboard'|'newVisita'...)
+function showScreen(oldId) {
+    const map = {
+        'dashboard': 'screen-home',
+        'polos': 'screen-polos-grid',
+        'newPolo': 'screen-cadastro-polo',
+        'newVisita': 'visitas',
+        'newTarefa': 'tarefas'
+    };
+    const target = map[oldId] || oldId;
+    navigateTo(target);
 }
 
 // ===== BANCO DE DADOS =====
@@ -66,6 +126,9 @@ function initializeDatabase() {
         })
         .then(function() {
             console.log('Banco de dados inicializado com sucesso');
+            // Atualizar contadores e telas iniciais
+            renderPolos();
+            updateCounts();
         })
         .catch(function(error) {
             console.error('Erro ao inicializar banco de dados', error);
@@ -227,6 +290,104 @@ function inserirDadosTeste() {
             }, Promise.resolve());
         });
     });
+}
+
+// Renderização de lista de polos
+function renderPolos() {
+    const container = document.getElementById('polosGrid');
+    if (!container) return;
+
+    showSpinner();
+
+    runSql('SELECT id, nome, telefone, endereco, data_nascimento FROM polos ORDER BY id DESC').then(function(result) {
+        let html = '';
+
+        for (let i = 0; i < result.rows.length; i++) {
+            const row = result.rows.item(i);
+            html += '<div class="col-12 col-md-6">';
+            html += '<div class="card" style="cursor:pointer;" onclick="navigateTo(\'screen-amigos-list\');">';
+            html += '<div class="card-body">';
+            html += '<h5 class="card-title">' + escapeHtml(row.nome) + '</h5>';
+            if (row.telefone) html += '<p class="card-text small text-muted">' + escapeHtml(row.telefone) + '</p>';
+            html += '</div></div></div>';
+        }
+
+        container.innerHTML = html || '<div class="col-12"><p class="text-muted">Nenhum polo cadastrado.</p></div>';
+        hideSpinner();
+        updateCounts();
+    }).catch(function(err) {
+        console.error('Erro ao carregar polos', err);
+        container.innerHTML = '<div class="col-12"><p class="text-danger">Erro ao carregar polos.</p></div>';
+        hideSpinner();
+    });
+}
+
+function updateCounts() {
+    runSql('SELECT COUNT(*) AS total FROM polos').then(function(res) {
+        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
+        const el = document.getElementById('countPolos');
+        if (el) el.textContent = total;
+    });
+
+    runSql('SELECT COUNT(*) AS total FROM amigos').then(function(res) {
+        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
+        const el = document.getElementById('countAmigos');
+        if (el) el.textContent = total;
+    });
+
+    runSql('SELECT COUNT(*) AS total FROM visitas').then(function(res) {
+        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
+        const el = document.getElementById('countVisitas');
+        if (el) el.textContent = total;
+    });
+
+    runSql('SELECT COUNT(*) AS total FROM tarefas').then(function(res) {
+        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
+        const el = document.getElementById('countTarefas');
+        if (el) el.textContent = total;
+    });
+}
+
+function showSpinner() {
+    const s = document.getElementById('loadingSpinner');
+    if (s) s.style.display = '';
+}
+
+function hideSpinner() {
+    const s = document.getElementById('loadingSpinner');
+    if (s) s.style.display = 'none';
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, function (m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+}
+
+function inserirNovoPolo() {
+    const nome = (document.getElementById('poloNome') || {}).value || '';
+    const telefone = (document.getElementById('poloTelefone') || {}).value || '';
+    const endereco = (document.getElementById('poloEndereco') || {}).value || '';
+    const data_nascimento = (document.getElementById('poloData') || {}).value || '';
+    const observacoes = (document.getElementById('poloObs') || {}).value || '';
+
+    if (!nome.trim()) {
+        alert('Nome do polo é obrigatório');
+        return;
+    }
+
+    runSql('INSERT INTO polos (nome, telefone, endereco, data_nascimento, observacoes) VALUES (?, ?, ?, ?, ?)', [nome, telefone, endereco, data_nascimento, observacoes])
+        .then(function() {
+            // limpar form
+            const form = document.getElementById('formNovoPolo');
+            if (form) form.reset();
+            // navegar para lista de polos e recarregar
+            navigateTo('screen-polos-grid');
+            renderPolos();
+        })
+        .catch(function(err) {
+            console.error('Erro ao inserir polo', err);
+            alert('Erro ao salvar polo');
+        });
 }
 
 // ===== HELPERS =====

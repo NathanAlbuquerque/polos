@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.polos.gestor" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Gestor de Polos</name>
+    <description>
+        Aplicativo offline-first para gerenciar redes de contatos e interações sociais de forma hierárquica.
+    </description>
+    <author email="dev@polos.app" href="https://polos.app">
+        Equipe Polos
+    </author>
+    <content src="index.html" />
+
+    <!-- Preferências de UI -->
+    <preference name="Orientation" value="portrait" />
+    <preference name="StatusBarBackgroundColor" value="#0a5ecf" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <preference name="ShowSplashScreenSpinner" value="false" />
+
+    <!-- Access Rules -->
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+
+    <!-- Plugins -->
+    <plugin name="cordova-plugin-statusbar" spec="^2.4.3" />
+    <plugin name="cordova-sqlite-storage" spec="^6.0.2" />
+
+    <!-- Plataforma Android -->
+    <platform name="android">
+        <allow-intent href="market:*" />
+    </platform>
+</widget>

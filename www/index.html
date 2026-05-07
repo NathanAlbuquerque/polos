@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="color-scheme" content="light">
+
+        <!-- Estilos -->
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/flatpickr.min.css">
+        <link rel="stylesheet" href="css/style.css">
+
+        <title>Gestor de Polos</title>
+    </head>
+    <body>
+        <!-- Navbar Fixa -->
+        <nav class="navbar navbar-dark bg-primary sticky-top">
+            <div class="container-fluid">
+                <button class="btn btn-link text-white" id="backBtn" onclick="goBack()">
+                    <span class="fs-5">← Voltar</span>
+                </button>
+                <span class="navbar-brand mb-0 h1 flex-grow-1 text-center" id="navbarTitle">
+                    Gestor de Polos
+                </span>
+                <div style="width: 60px;"></div><!-- Espaçador para centralizar título -->
+            </div>
+        </nav>
+
+        <!-- Container Principal -->
+        <main style="padding-top: 70px; padding-bottom: 60px;">
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" data-title="Dashboard" class="container py-4">
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="card bg-primary text-white text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Polos</h5>
+                                <h2 id="countPolos">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card bg-info text-white text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Amigos</h5>
+                                <h2 id="countAmigos">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="card bg-success text-white text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Visitas</h5>
+                                <h2 id="countVisitas">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card bg-danger text-white text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Tarefas</h5>
+                                <h2 id="countTarefas">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-primary w-100" onclick="showScreen('polos')">
+                        Gerenciar Polos
+                    </button>
+                </div>
+            </section>
+
+            <!-- POLOS -->
+            <section id="polos" data-title="Polos" class="d-none container py-4">
+                <div id="polosGrid" class="row g-3 mb-4">
+                    <!-- Cards de Polos serão renderizados aqui -->
+                </div>
+                <button class="btn btn-success w-100" onclick="showScreen('newPolo')">
+                    ➕ Novo Polo
+                </button>
+            </section>
+
+            <!-- NOVO POLO -->
+            <section id="newPolo" data-title="Novo Polo" class="d-none container py-4">
+                <form id="formNovoPolo">
+                    <div class="mb-3">
+                        <label for="poloNome" class="form-label">Nome *</label>
+                        <input type="text" class="form-control" id="poloNome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="poloTelefone" class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" id="poloTelefone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="poloEndereco" class="form-label">Endereço</label>
+                        <input type="text" class="form-control" id="poloEndereco">
+                    </div>
+                    <div class="mb-3">
+                        <label for="poloData" class="form-label">Data de Nascimento</label>
+                        <input type="text" class="form-control flatpickr-date" id="poloData">
+                    </div>
+                    <div class="mb-3">
+                        <label for="poloObs" class="form-label">Observações</label>
+                        <textarea class="form-control" id="poloObs" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Salvar Polo</button>
+                </form>
+            </section>
+
+            <!-- VISITAS -->
+            <section id="visitas" data-title="Visitas" class="d-none container py-4">
+                <div id="visitasList" class="list-group mb-4">
+                    <!-- Visitas serão renderizadas aqui -->
+                </div>
+                <button class="btn btn-success w-100" onclick="showScreen('newVisita')">
+                    ➕ Nova Visita
+                </button>
+            </section>
+
+            <!-- TAREFAS -->
+            <section id="tarefas" data-title="Tarefas" class="d-none container py-4">
+                <div id="tarefasList" class="list-group mb-4">
+                    <!-- Tarefas serão renderizadas aqui -->
+                </div>
+                <button class="btn btn-success w-100" onclick="showScreen('newTarefa')">
+                    ➕ Nova Tarefa
+                </button>
+            </section>
+
+        </main>
+
+        <!-- Scripts (ordem específica) -->
+        <script src="cordova.js"></script>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script src="js/flatpickr.min.js"></script>
+        <script src="js/app.js"></script>
+    </body>
+</html>

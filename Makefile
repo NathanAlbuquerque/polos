@@ -110,7 +110,7 @@ backup:
 		NEW_VER=$$((LAST_VER + 1)); \
 	fi; \
 	FMT_VER=$$(printf "%02d" $$NEW_VER); \
-	NEW_NAME="app-debug-v$$FMT_VER.apk"; \
+	NEW_NAME="polos-backup-v$$FMT_VER.apk"; \
 	echo "🚀 Backup versão v$$FMT_VER..."; \
 	adb push $(APK_PATH) $(BACKUP_PATH)/$$NEW_NAME; \
 	echo "✅ Backup: $$NEW_NAME"

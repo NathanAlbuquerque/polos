@@ -190,22 +190,79 @@
 
             <!-- VISITAS -->
             <section id="visitas" data-title="Visitas" class="app-screen d-none container py-4" style="display:none;">
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1">Registrar visita</h3>
+                    <p class="section-subtitle mb-0">Escolha quem foi visitado e use a data dinâmica em português.</p>
+                </div>
+                <form id="formNovoVisita" class="mb-4">
+                    <div class="mb-3">
+                        <label for="visitaPessoa" class="form-label">Pessoa Visitada *</label>
+                        <select class="form-select" id="visitaPessoa" required>
+                            <option value="">Selecione a pessoa</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visitaMotivo" class="form-label">Motivo</label>
+                        <input type="text" class="form-control" id="visitaMotivo">
+                    </div>
+                    <div class="mb-3">
+                        <label for="visitaData" class="form-label">Data da Visita *</label>
+                        <input type="text" class="form-control flatpickr-date" id="visitaData" placeholder="DD/MM/AAAA" autocomplete="off" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="visitaObs" class="form-label">Observações</label>
+                        <textarea class="form-control" id="visitaObs" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Salvar Visita</button>
+                </form>
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1">Histórico de visitas</h3>
+                    <p class="section-subtitle mb-0">Toque em uma visita para ver detalhes e gerar uma tarefa.</p>
+                </div>
                 <div id="visitasList" class="list-group mb-4">
                     <!-- Visitas serão renderizadas aqui -->
                 </div>
-                <button class="btn btn-success w-100" onclick="showScreen('newVisita')">
-                    ➕ Nova Visita
-                </button>
+            </section>
+
+            <!-- DETALHES DA VISITA -->
+            <section id="screen-visita-detalhes" data-title="Detalhes da Visita" class="app-screen container py-4" style="display:none;">
+                <div id="visitaDetalhesContent"></div>
             </section>
 
             <!-- TAREFAS -->
             <section id="tarefas" data-title="Tarefas" class="app-screen d-none container py-4" style="display:none;">
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1">Registrar tarefa</h3>
+                    <p class="section-subtitle mb-0">Acompanhe prazos e conclua com um toque.</p>
+                </div>
+                <form id="formNovoTarefa" class="mb-4">
+                    <div class="mb-3">
+                        <label for="tarefaPessoa" class="form-label">Pessoa Envolvida *</label>
+                        <select class="form-select" id="tarefaPessoa" required>
+                            <option value="">Selecione a pessoa</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tarefaTitulo" class="form-label">Título *</label>
+                        <input type="text" class="form-control" id="tarefaTitulo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tarefaDescricao" class="form-label">Observações</label>
+                        <textarea class="form-control" id="tarefaDescricao" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tarefaPrazo" class="form-label">Prazo *</label>
+                        <input type="text" class="form-control flatpickr-date" id="tarefaPrazo" placeholder="DD/MM/AAAA" autocomplete="off" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Salvar Tarefa</button>
+                </form>
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1">Fila de tarefas</h3>
+                    <p class="section-subtitle mb-0">As concluídas ficam em verde e as pendentes vencidas em vermelho.</p>
+                </div>
                 <div id="tarefasList" class="list-group mb-4">
                     <!-- Tarefas serão renderizadas aqui -->
                 </div>
-                <button class="btn btn-success w-100" onclick="showScreen('newTarefa')">
-                    ➕ Nova Tarefa
-                </button>
             </section>
 
         </main>

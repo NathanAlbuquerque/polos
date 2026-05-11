@@ -57,109 +57,310 @@ body {
 h1 {
     font-size:24px;
     font-weight:normal;
-
-    .list-group-flush {
-        border-radius: 18px;
-        overflow: hidden;
-    }
-
-    .friend-list-item {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 1rem 1.05rem;
-        border: 0;
-        border-bottom: 1px solid rgba(65, 183, 255, 0.14);
-        background: rgba(255, 255, 255, 0.9);
-    }
-
-    .friend-list-item:last-child {
-        border-bottom: 0;
-    }
-
-    .friend-list-main {
-        min-width: 0;
-    }
-
-    .friend-name {
-        color: var(--app-primary);
-        font-size: 1rem;
-        font-weight: 800;
-        line-height: 1.2;
-    }
-
-    .friend-meta,
-    .friend-secondary {
-        color: var(--app-primary-soft);
-        font-size: 0.86rem;
-        font-weight: 600;
-        margin-top: 0.2rem;
-    }
-
-    .friend-actions {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        flex-shrink: 0;
-    }
-
-    .btn-back-app {
-        border: 0;
-        border-radius: 999px;
-        padding: 0.6rem 0.95rem;
-        font-weight: 800;
-        color: #fff;
-        background: linear-gradient(135deg, #0a5ecf, #08449b);
-        box-shadow: 0 10px 22px rgba(10, 94, 207, 0.25);
-    }
-
-    .btn-back-app:hover,
-    .btn-back-app:focus {
-        color: #fff;
-    }
-
-    .btn-back-app .back-arrow {
-        display: inline-flex;
-        width: 1.5rem;
-        height: 1.5rem;
-        align-items: center;
-        justify-content: center;
-        margin-right: 0.35rem;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.16);
-    }
-
-    .btn-circle-white {
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.35);
-    }
-
-    .btn-circle-white:hover,
-    .btn-circle-white:focus {
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.5);
-        background: rgba(255, 255, 255, 0.12);
-    }
-
-    .app-button-icon {
-        color: #fff;
-    }
-
-    .app-button-icon svg {
-        width: 1rem;
-        height: 1rem;
-        fill: currentColor;
-    }
-
-    .friend-form-note {
-        color: var(--app-muted);
-        font-size: 0.86rem;
-    }
     margin:0px;
     overflow:visible;
     padding:0px;
     text-align:center;
+}
+
+.list-group-flush {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.friend-list-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.05rem;
+    border: 0;
+    border-bottom: 1px solid rgba(65, 183, 255, 0.14);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.friend-list-item:last-child {
+    border-bottom: 0;
+}
+
+.friend-list-main {
+    min-width: 0;
+}
+
+.friend-name {
+    color: var(--app-primary);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.friend-meta,
+.friend-secondary {
+    color: var(--app-primary-soft);
+    font-size: 0.86rem;
+    font-weight: 600;
+    margin-top: 0.2rem;
+}
+
+.friend-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.btn-back-app {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.6rem 0.95rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #0a5ecf, #08449b);
+    box-shadow: 0 10px 22px rgba(10, 94, 207, 0.25);
+}
+
+.btn-back-app:hover,
+.btn-back-app:focus {
+    color: #fff;
+}
+
+.btn-back-app .back-arrow {
+    display: inline-flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.35rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.btn-circle-white {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.btn-circle-white:hover,
+.btn-circle-white:focus {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.app-button-icon {
+    color: #fff;
+}
+
+.app-button-icon svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
+.friend-form-note {
+    color: var(--app-muted);
+    font-size: 0.86rem;
+}
+
+.polo-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 180px;
+    padding: 1rem 0.75rem 0.9rem;
+    border: 1px solid rgba(10, 94, 207, 0.09);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 12px 28px rgba(23, 50, 77, 0.08);
+    transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.polo-card:active {
+    transform: scale(0.99);
+}
+
+.polo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 34px rgba(23, 50, 77, 0.12);
+}
+
+.polo-card-photo {
+    width: 84px;
+    height: 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.9rem;
+}
+
+.polo-photo-circle,
+.polo-photo-placeholder {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(10, 94, 207, 0.18);
+    box-shadow: 0 10px 18px rgba(23, 50, 77, 0.08);
+}
+
+.polo-photo-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #41b7ff, #0a5ecf);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.polo-card-body {
+    width: 100%;
+    text-align: center;
+}
+
+.polo-card-name {
+    color: #0a5ecf;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.polo-card-meta {
+    margin-top: 0.2rem;
+    color: #6b7f93;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.polo-detail-hero {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(10, 94, 207, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(23, 50, 77, 0.08);
+}
+
+.polo-detail-photo {
+    flex: 0 0 auto;
+}
+
+.polo-detail-copy {
+    min-width: 0;
+}
+
+.polo-detail-name {
+    color: #0a5ecf;
+    font-size: 1.4rem;
+    line-height: 1.15;
+}
+
+.polo-detail-meta {
+    color: #5f7286;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.15rem;
+}
+
+.detail-panel {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(10, 94, 207, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(23, 50, 77, 0.08);
+}
+
+.detail-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(10, 94, 207, 0.08);
+}
+
+.detail-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.detail-row-stack {
+    display: block;
+}
+
+.detail-label {
+    color: #6b7f93;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.detail-value {
+    color: #17324d;
+    font-size: 0.98rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.detail-row-stack .detail-value {
+    display: block;
+    margin-top: 0.2rem;
+    text-align: left;
+    font-weight: 500;
+}
+
+.visit-card,
+.task-card {
+    border: 1px solid rgba(10, 94, 207, 0.08);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 14px 28px rgba(23, 50, 77, 0.08);
+}
+
+.visit-card {
+    border-left: 4px solid var(--app-primary-soft);
+}
+
+.task-card.is-pending {
+    border-left: 4px solid var(--app-danger);
+}
+
+.task-card.is-completed {
+    border-left: 4px solid var(--app-success);
+}
+
+.task-card.is-overdue {
+    border-left: 4px solid var(--app-danger);
+    background: rgba(173, 11, 11, 0.04);
+}
+
+.task-card .task-action,
+.visit-card .visit-action {
+    color: var(--app-primary);
+    border-color: rgba(10, 94, 207, 0.18);
+}
+
+.task-card .task-action:hover,
+.visit-card .visit-action:hover {
+    background: rgba(10, 94, 207, 0.08);
+}
+
+@media (max-width: 575.98px) {
+    .polo-detail-hero,
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-value {
+        text-align: left;
+    }
 }
 
 .event {
@@ -219,7 +420,21 @@ h1 {
 #loadingSpinner { display: none; }
 
 /* Ajustes responsivos para títulos */
-#page-title { font-size: 1.05rem; margin: 0; }
+#page-title {
+    font-size: 1.05rem;
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(72vw, 320px);
+    text-align: center;
+    pointer-events: none;
+}
+
+.app-navbar .container-fluid {
+    position: relative;
+    min-height: 56px;
+}
 
 #page-title,
 .dashboard-headline,

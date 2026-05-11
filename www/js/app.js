@@ -5,9 +5,10 @@ document.addEventListener('deviceready', onDeviceReady, false);
 
 let navigationHistory = ['screen-home'];
 let currentScreen = 'screen-home';
+let amigoListFilterPoloId = null;
 
 function onDeviceReady() {
-    console.log('Cordova ready');
+    console.log('App ready');
     try { console.log('Platform: ' + device.platform); console.log('OS Version: ' + device.version); } catch (e) {}
 
     applyNativeChrome();
@@ -76,8 +77,11 @@ function navigateTo(screenId, opts) {
         if (screenId === 'screen-polo-detalhes') {
             renderPoloDetails();
         }
+        if (screenId === 'screen-cadastro-amigo') {
+            initializeAmigoForm();
+        }
         if (screenId === 'screen-amigos-list') {
-            renderAmigos();
+            carregarAmigos();
         }
         if (screenId === 'visitas') {
             renderVisitas();
@@ -112,6 +116,7 @@ function showScreen(oldId) {
         'polos': 'screen-polos-grid',
         'newPolo': 'screen-cadastro-polo',
         'screen-polo-detalhes': 'screen-polo-detalhes',
+        'screen-cadastro-amigo': 'screen-cadastro-amigo',
         'screen-amigos-list': 'screen-amigos-list',
         'newVisita': 'visitas',
         'newTarefa': 'tarefas'
@@ -128,7 +133,7 @@ function MapsTo(screenId, area) {
 
     if (area === 'AMIGOS') {
         navigateTo(screenId, { force: true });
-        renderAmigos();
+        carregarAmigos();
         return;
     }
 
@@ -168,6 +173,9 @@ function initializeDatabase() {
             return ensurePoloPhotoColumn();
         })
         .then(function() {
+            return ensureAmigoPhotoColumn();
+        })
+        .then(function() {
             return inserirDadosTeste();
         })
         .then(function() {
@@ -201,7 +209,7 @@ function createSchema() {
             'endereco TEXT,' +
             'data_nascimento TEXT,' +
             'observacoes TEXT,' +
-            'foto_url TEXT,' +
+            'foto TEXT,' +
             'criado_em TEXT DEFAULT CURRENT_TIMESTAMP,' +
             'FOREIGN KEY(polo_id) REFERENCES polos(id) ON DELETE CASCADE' +
         ')',
@@ -248,6 +256,26 @@ function ensurePoloPhotoColumn() {
         }
 
         return runSql('ALTER TABLE polos ADD COLUMN foto TEXT');
+    });
+}
+
+function ensureAmigoPhotoColumn() {
+    return runSql('PRAGMA table_info(amigos)').then(function(result) {
+        let hasFoto = false;
+
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const column = result.rows.item(i);
+            if (column.name === 'foto') {
+                hasFoto = true;
+                break;
+            }
+        }
+
+        if (hasFoto) {
+            return null;
+        }
+
+        return runSql('ALTER TABLE amigos ADD COLUMN foto TEXT');
     });
 }
 
@@ -509,7 +537,8 @@ function renderPoloDetails() {
         }
         html.push('</div>');
 
-        html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="MapsTo(\'screen-amigos-list\', \'AMIGOS\')">Listar Amigos</button>');
+        html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="carregarAmigos(' + row.id + ')">Listar Amigos</button>');
+        html.push('<button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="abrirCadastroAmigo(' + row.id + ')">Adicionar Amigo</button>');
         html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-polos-grid\')">Voltar para Polos</button>');
 
         container.innerHTML = html.join('');
@@ -526,33 +555,168 @@ function updateCounts() {
 }
 
 function renderAmigos() {
+    return carregarAmigos();
+}
+
+function carregarAmigos(poloId) {
     const container = document.getElementById('amigosList');
-    if (!container) return;
+    if (!container) return Promise.resolve();
+
+    amigoListFilterPoloId = poloId || null;
+
+    const subtitle = document.getElementById('amigosListSubtitle');
+    if (subtitle) {
+        subtitle.textContent = poloId ? 'Amigos filtrados pelo Polo selecionado.' : 'Lista geral de contatos vinculados aos polos.';
+    }
 
     showSpinner();
 
-    runSql(
-        'SELECT amigos.id, amigos.nome, amigos.telefone, amigos.data_nascimento, polos.nome AS polo_nome ' +
-        'FROM amigos LEFT JOIN polos ON polos.id = amigos.polo_id ORDER BY amigos.nome ASC'
-    ).then(function(result) {
+    const query = poloId
+        ? {
+            sql: 'SELECT a.*, p.nome AS nome_polo FROM amigos a JOIN polos p ON a.polo_id = p.id WHERE a.polo_id = ? ORDER BY a.nome ASC',
+            params: [poloId]
+        }
+        : {
+            sql: 'SELECT a.*, p.nome AS nome_polo FROM amigos a JOIN polos p ON a.polo_id = p.id ORDER BY a.nome ASC',
+            params: []
+        };
+
+    return runSql(query.sql, query.params).then(function(result) {
         let html = '';
 
         for (let i = 0; i < result.rows.length; i += 1) {
             const row = result.rows.item(i);
-            html += '<div class="list-group-item">';
-            html += '<div class="fw-semibold">' + escapeHtml(row.nome) + '</div>';
-            html += '<div class="small text-muted">Polo: ' + escapeHtml(row.polo_nome || 'Sem vínculo') + '</div>';
-            if (row.telefone) html += '<div class="small text-muted">' + escapeHtml(row.telefone) + '</div>';
+            html += '<div class="friend-list-item">';
+            html += '<div class="friend-list-main">';
+            html += '<div class="friend-name">' + escapeHtml(row.nome) + '</div>';
+            html += '<div class="friend-meta">Apresentado por: ' + escapeHtml(row.nome_polo || 'Sem vínculo') + '</div>';
+            if (row.telefone) {
+                html += '<div class="friend-secondary">' + escapeHtml(row.telefone) + '</div>';
+            }
             html += '</div>';
+            html += '<div class="friend-actions">';
+            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="abrirCadastroAmigo(' + row.polo_id + ')">Novo</button>';
+            html += '<button type="button" class="btn btn-sm btn-outline-danger" data-nome="' + escapeHtml(row.nome).replace(/"/g, '&quot;') + '" onclick="removerAmigo(' + row.id + ', this.dataset.nome)">Excluir</button>';
+            html += '</div></div>';
         }
 
-        container.innerHTML = html || '<div class="list-group-item text-muted">Nenhum amigo cadastrado.</div>';
+        container.innerHTML = html || '<div class="friend-list-item text-muted">Nenhum amigo cadastrado.</div>';
         hideSpinner();
+        return result;
     }).catch(function(err) {
         console.error('Erro ao carregar amigos', err);
-        container.innerHTML = '<div class="list-group-item text-danger">Erro ao carregar amigos.</div>';
+        container.innerHTML = '<div class="friend-list-item text-danger">Erro ao carregar amigos.</div>';
         hideSpinner();
+        return null;
     });
+}
+
+function carregarPolosSelect(selectedPoloId) {
+    const select = document.getElementById('amigoPolo');
+    if (!select) return Promise.resolve();
+
+    return runSql('SELECT id, nome FROM polos ORDER BY nome ASC').then(function(result) {
+        let options = '<option value="">Selecione o Polo</option>';
+
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const row = result.rows.item(i);
+            const selected = String(row.id) === String(selectedPoloId) ? ' selected' : '';
+            options += '<option value="' + row.id + '"' + selected + '>' + escapeHtml(row.nome) + '</option>';
+        }
+
+        select.innerHTML = options;
+        if (selectedPoloId) {
+            select.value = String(selectedPoloId);
+        }
+        return result;
+    });
+}
+
+function initializeAmigoForm(selectedPoloId) {
+    carregarPolosSelect(selectedPoloId);
+
+    const form = document.getElementById('formNovoAmigo');
+    if (form && !form.dataset.bound) {
+        form.dataset.bound = 'true';
+        form.addEventListener('submit', function(ev) {
+            ev.preventDefault();
+            salvarNovoAmigo();
+        });
+    }
+
+    const dataInput = document.getElementById('amigoData');
+    if (dataInput && typeof flatpickr === 'function' && !dataInput.dataset.flatpickrReady) {
+        dataInput.dataset.flatpickrReady = 'true';
+        flatpickr(dataInput, {
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd/m/Y',
+            allowInput: true,
+            maxDate: 'today'
+        });
+    }
+}
+
+function abrirCadastroAmigo(poloId) {
+    navigateTo('screen-cadastro-amigo', { force: true });
+    initializeAmigoForm(poloId);
+}
+
+function salvarNovoAmigo() {
+    const poloId = (document.getElementById('amigoPolo') || {}).value || '';
+    const nome = (document.getElementById('amigoNome') || {}).value || '';
+    const telefone = (document.getElementById('amigoTelefone') || {}).value || '';
+    const endereco = (document.getElementById('amigoEndereco') || {}).value || '';
+    const data_nascimento = (document.getElementById('amigoData') || {}).value || '';
+    const observacoes = (document.getElementById('amigoObs') || {}).value || '';
+
+    if (!poloId) {
+        alert('Selecione o Polo de Origem');
+        return;
+    }
+
+    if (!nome.trim()) {
+        alert('Nome do amigo é obrigatório');
+        return;
+    }
+
+    runSql('INSERT INTO amigos (polo_id, nome, telefone, endereco, data_nascimento, observacoes) VALUES (?, ?, ?, ?, ?, ?)', [poloId, nome, telefone, endereco, data_nascimento, observacoes])
+        .then(function() {
+            const form = document.getElementById('formNovoAmigo');
+            if (form) form.reset();
+            navigateTo('screen-amigos-list', { force: true });
+            carregarAmigos(poloId);
+            atualizarDashboard();
+        })
+        .catch(function(err) {
+            console.error('Erro ao inserir amigo', err);
+            alert('Erro ao salvar amigo');
+        });
+}
+
+function removerAmigo(amigoId, nomeAmigo) {
+    if (!amigoId) return;
+
+    const confirmation = confirm('Deseja remover ' + nomeAmigo + '? As visitas e tarefas vinculadas também serão removidas.');
+    if (!confirmation) {
+        return;
+    }
+
+    runSql('DELETE FROM visitas WHERE pessoa_id = ? AND tipo_pessoa = "AMIGOS"', [amigoId])
+        .then(function() {
+            return runSql('DELETE FROM tarefas WHERE pessoa_id = ? AND tipo_pessoa = "AMIGOS"', [amigoId]);
+        })
+        .then(function() {
+            return runSql('DELETE FROM amigos WHERE id = ?', [amigoId]);
+        })
+        .then(function() {
+            carregarAmigos(amigoListFilterPoloId);
+            atualizarDashboard();
+        })
+        .catch(function(err) {
+            console.error('Erro ao remover amigo', err);
+            alert('Erro ao remover amigo');
+        });
 }
 
 function renderVisitas() {
@@ -642,13 +806,14 @@ function inserirNovoPolo() {
     const endereco = (document.getElementById('poloEndereco') || {}).value || '';
     const data_nascimento = (document.getElementById('poloData') || {}).value || '';
     const observacoes = (document.getElementById('poloObs') || {}).value || '';
+    const foto = (document.getElementById('poloFoto') || {}).value || '';
 
     if (!nome.trim()) {
         alert('Nome do polo é obrigatório');
         return;
     }
 
-    runSql('INSERT INTO polos (nome, telefone, endereco, data_nascimento, observacoes) VALUES (?, ?, ?, ?, ?)', [nome, telefone, endereco, data_nascimento, observacoes])
+    runSql('INSERT INTO polos (nome, telefone, endereco, data_nascimento, observacoes, foto) VALUES (?, ?, ?, ?, ?, ?)', [nome, telefone, endereco, data_nascimento, observacoes, foto])
         .then(function() {
             // limpar form
             const form = document.getElementById('formNovoPolo');

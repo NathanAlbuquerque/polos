@@ -19,8 +19,9 @@
         <!-- Navbar Fixa -->
         <nav class="navbar navbar-dark app-navbar sticky-top">
             <div class="container-fluid">
-                <button class="btn btn-link text-white" id="backBtn" onclick="goBack()" style="display:none;">
-                    <span class="fs-5">← Voltar</span>
+                <button class="btn btn-back-app" id="backBtn" onclick="goBack()" style="display:none;">
+                    <span class="back-arrow" aria-hidden="true">←</span>
+                    Voltar
                 </button>
                 <h2 id="page-title" class="mb-0 flex-grow-1 text-center text-white">Gestor de Polos</h2>
                 <div id="loadingSpinner" style="width:60px; text-align:right; display:none">
@@ -91,11 +92,17 @@
             <section id="screen-amigos-list" data-title="Amigos" class="app-screen container py-4" style="display:none;">
                 <div class="section-panel mb-3">
                     <h3 class="section-title mb-1">Lista geral de amigos</h3>
-                    <p class="section-subtitle mb-0">Acesso rápido aos contatos associados aos polos.</p>
+                    <p id="amigosListSubtitle" class="section-subtitle mb-0">Acesso rápido aos contatos associados aos polos.</p>
                 </div>
-                <div id="amigosList" class="list-group mb-4">
+                <div id="amigosList" class="list-group list-group-flush mb-4">
                     <!-- Amigos serão renderizados aqui -->
                 </div>
+                <button class="btn btn-primary w-100" onclick="navigateTo('screen-cadastro-amigo')">
+                    <span class="app-button-icon me-1" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+                    </span>
+                    Adicionar Amigo
+                </button>
             </section>
 
             <!-- POLOS -->
@@ -104,13 +111,50 @@
                     <!-- Cards de Polos serão renderizados aqui -->
                 </div>
                 <button class="btn btn-success w-100" onclick="navigateTo('screen-cadastro-polo')">
-                    ➕ Novo Polo
+                    <span class="app-button-icon me-1" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
+                    </span>
+                    Novo Polo
                 </button>
             </section>
 
             <!-- DETALHES DO POLO -->
             <section id="screen-polo-detalhes" data-title="Detalhes do Polo" class="app-screen container py-4" style="display:none;">
                 <div id="poloDetalhesContent"></div>
+            </section>
+
+            <!-- NOVO AMIGO -->
+            <section id="screen-cadastro-amigo" data-title="Novo Amigo" class="app-screen container py-4" style="display:none;">
+                <form id="formNovoAmigo">
+                    <div class="mb-3">
+                        <label for="amigoPolo" class="form-label">Polo de Origem *</label>
+                        <select class="form-select" id="amigoPolo" required>
+                            <option value="">Selecione o Polo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amigoNome" class="form-label">Nome *</label>
+                        <input type="text" class="form-control" id="amigoNome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amigoTelefone" class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" id="amigoTelefone" inputmode="numeric" autocomplete="tel">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amigoEndereco" class="form-label">Endereço</label>
+                        <input type="text" class="form-control" id="amigoEndereco">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amigoData" class="form-label">Data de Nascimento</label>
+                        <input type="text" class="form-control flatpickr-date" id="amigoData" placeholder="YYYY-MM-DD" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amigoObs" class="form-label">Observações</label>
+                        <textarea class="form-control" id="amigoObs" rows="3"></textarea>
+                    </div>
+                    <p class="friend-form-note mb-3">O amigo sempre fica vinculado a um Polo para manter a hierarquia da rede.</p>
+                    <button type="submit" class="btn btn-primary w-100">Salvar Amigo</button>
+                </form>
             </section>
 
             <!-- NOVO POLO -->
@@ -127,6 +171,10 @@
                     <div class="mb-3">
                         <label for="poloEndereco" class="form-label">Endereço</label>
                         <input type="text" class="form-control" id="poloEndereco">
+                    </div>
+                    <div class="mb-3">
+                        <label for="poloFoto" class="form-label">Foto</label>
+                        <input type="text" class="form-control" id="poloFoto" placeholder="Caminho da imagem ou Base64 curto">
                     </div>
                     <div class="mb-3">
                         <label for="poloData" class="form-label">Data de Nascimento</label>

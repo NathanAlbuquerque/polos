@@ -54,33 +54,108 @@ body {
     width:100%;
 }
 
-/* Portrait layout (default) */
-.app {
-    background:url(../img/logo.png) no-repeat center top; /* 170px x 200px */
-    position:absolute;             /* position in the center of the screen */
-    left:50%;
-    top:50%;
-    height:50px;                   /* text area height */
-    width:225px;                   /* text area width */
-    text-align:center;
-    padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
-    margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
-                                   /* offset horizontal: half of text area width */
-}
-
-/* Landscape layout (with min-width) */
-@media screen and (min-aspect-ratio: 1/1) and (min-width:400px) {
-    .app {
-        background-position:left center;
-        padding:75px 0px 75px 170px;  /* padding-top + padding-bottom + text area = image height */
-        margin:-90px 0px 0px -198px;  /* offset vertical: half of image height */
-                                      /* offset horizontal: half of image width and text area width */
-    }
-}
-
 h1 {
     font-size:24px;
     font-weight:normal;
+
+    .list-group-flush {
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .friend-list-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.05rem;
+        border: 0;
+        border-bottom: 1px solid rgba(65, 183, 255, 0.14);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .friend-list-item:last-child {
+        border-bottom: 0;
+    }
+
+    .friend-list-main {
+        min-width: 0;
+    }
+
+    .friend-name {
+        color: var(--app-primary);
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .friend-meta,
+    .friend-secondary {
+        color: var(--app-primary-soft);
+        font-size: 0.86rem;
+        font-weight: 600;
+        margin-top: 0.2rem;
+    }
+
+    .friend-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .btn-back-app {
+        border: 0;
+        border-radius: 999px;
+        padding: 0.6rem 0.95rem;
+        font-weight: 800;
+        color: #fff;
+        background: linear-gradient(135deg, #0a5ecf, #08449b);
+        box-shadow: 0 10px 22px rgba(10, 94, 207, 0.25);
+    }
+
+    .btn-back-app:hover,
+    .btn-back-app:focus {
+        color: #fff;
+    }
+
+    .btn-back-app .back-arrow {
+        display: inline-flex;
+        width: 1.5rem;
+        height: 1.5rem;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.35rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.16);
+    }
+
+    .btn-circle-white {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .btn-circle-white:hover,
+    .btn-circle-white:focus {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .app-button-icon {
+        color: #fff;
+    }
+
+    .app-button-icon svg {
+        width: 1rem;
+        height: 1rem;
+        fill: currentColor;
+    }
+
+    .friend-form-note {
+        color: var(--app-muted);
+        font-size: 0.86rem;
+    }
     margin:0px;
     overflow:visible;
     padding:0px;
@@ -330,7 +405,8 @@ h1 {
 
 .polo-card-body {
     width: 100%;
-    text-align: center;
+    text-align:center;
+}
 }
 
 .polo-card-name {

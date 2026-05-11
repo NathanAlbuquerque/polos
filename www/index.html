@@ -17,7 +17,7 @@
     </head>
     <body>
         <!-- Navbar Fixa -->
-        <nav class="navbar navbar-dark bg-primary sticky-top">
+        <nav class="navbar navbar-dark app-navbar sticky-top">
             <div class="container-fluid">
                 <button class="btn btn-link text-white" id="backBtn" onclick="goBack()" style="display:none;">
                     <span class="fs-5">← Voltar</span>
@@ -36,44 +36,66 @@
 
             <!-- DASHBOARD -->
             <section id="screen-home" data-title="Dashboard" class="app-screen container py-4">
-                <div class="row mb-4">
-                    <div class="col-6">
-                        <div class="card bg-primary text-white text-center" onclick="navigateTo('screen-polos-grid')" style="cursor: pointer;">
-                            <div class="card-body">
-                                <h5 class="card-title">Polos</h5>
-                                <h2 id="countPolos">0</h2>
-                            </div>
-                        </div>
+                <div class="dashboard-summary mb-4">
+                    <p class="dashboard-kicker mb-2">Resumo rápido</p>
+                    <h3 class="dashboard-headline mb-1">Veja o que exige atenção agora</h3>
+                    <p id="dashboard-hint" class="dashboard-hint mb-0">Carregando indicadores do banco de dados...</p>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <button type="button" class="dashboard-card dashboard-card-polos w-100 text-start" onclick="MapsTo('screen-polos-grid', 'POLOS')">
+                            <span class="dashboard-card-icon dashboard-icon-polos" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M12 2l8 4.5v11L12 22l-8-4.5v-11L12 2zm0 2.3L6 7v8l6 3.4 6-3.4V7l-6-2.7zM9 8h6v2H9V8zm0 4h6v2H9v-2z"/></svg>
+                            </span>
+                            <span class="dashboard-card-label">Polos</span>
+                            <span class="dashboard-card-value"><span id="dash-polos-count">0</span> cadastrados</span>
+                            <span class="dashboard-card-footnote">Abrir a grade de fotos</span>
+                        </button>
                     </div>
-                    <div class="col-6">
-                        <div class="card bg-info text-white text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Amigos</h5>
-                                <h2 id="countAmigos">0</h2>
-                            </div>
-                        </div>
+                    <div class="col-12 col-md-6">
+                        <button type="button" class="dashboard-card dashboard-card-amigos w-100 text-start" onclick="MapsTo('screen-amigos-list', 'AMIGOS')">
+                            <span class="dashboard-card-icon dashboard-icon-amigos" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5S14.34 11 16 11zm-8 0c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11zm0 2c-2.67 0-8 1.34-8 4v3h10v-3c0-1.08.35-2.03.93-2.84C10.16 13.68 9.14 13 8 13zm8 0c-.29 0-.58.02-.87.06.55.82.87 1.77.87 2.94v3h8v-3c0-2.66-5.33-4-8-4z"/></svg>
+                            </span>
+                            <span class="dashboard-card-label">Amigos</span>
+                            <span class="dashboard-card-value"><span id="dash-amigos-count">0</span> na rede</span>
+                            <span class="dashboard-card-footnote">Abrir a lista geral</span>
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <button type="button" class="dashboard-card dashboard-card-visitas w-100 text-start" onclick="MapsTo('visitas', 'VISITAS')">
+                            <span class="dashboard-card-icon dashboard-icon-visitas" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v15c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 17H5V9h14v11zm0-13H5V5h14v2zm-7 4h-2v2H8v2h2v2h2v-2h2v-2h-2v-2z"/></svg>
+                            </span>
+                            <span class="dashboard-card-label">Visitas</span>
+                            <span class="dashboard-card-value"><span id="dash-visitas-count">0</span> realizadas</span>
+                            <span class="dashboard-card-footnote">Ver histórico completo</span>
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <button type="button" class="dashboard-card dashboard-card-alertas w-100 text-start" onclick="MapsTo('tarefas', 'TAREFAS')">
+                            <span class="dashboard-card-icon dashboard-icon-alertas" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                            </span>
+                            <span class="dashboard-card-label">Alertas</span>
+                            <span class="dashboard-card-value"><span id="dash-alertas-count">0</span> pendências</span>
+                            <span class="dashboard-card-footnote">Ir para tarefas urgentes</span>
+                        </button>
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <div class="col-6">
-                        <div class="card bg-success text-white text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Visitas</h5>
-                                <h2 id="countVisitas">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="card bg-danger text-white text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Tarefas</h5>
-                                <h2 id="countTarefas">0</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </section>
 
+            <!-- AMIGOS -->
+            <section id="screen-amigos-list" data-title="Amigos" class="app-screen container py-4" style="display:none;">
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1">Lista geral de amigos</h3>
+                    <p class="section-subtitle mb-0">Acesso rápido aos contatos associados aos polos.</p>
+                </div>
+                <div id="amigosList" class="list-group mb-4">
+                    <!-- Amigos serão renderizados aqui -->
+                </div>
             </section>
 
             <!-- POLOS -->

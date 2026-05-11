@@ -10,6 +10,8 @@ function onDeviceReady() {
     console.log('Cordova ready');
     try { console.log('Platform: ' + device.platform); console.log('OS Version: ' + device.version); } catch (e) {}
 
+    applyNativeChrome();
+
     // Inicializar banco de dados SQLite
     initializeDatabase();
 
@@ -71,6 +73,15 @@ function navigateTo(screenId, opts) {
         if (screenId === 'screen-polos-grid') {
             renderPolos();
         }
+        if (screenId === 'screen-amigos-list') {
+            renderAmigos();
+        }
+        if (screenId === 'visitas') {
+            renderVisitas();
+        }
+        if (screenId === 'tarefas') {
+            renderTarefas();
+        }
         if (screenId === 'screen-home') {
             updateCounts();
         }
@@ -97,11 +108,39 @@ function showScreen(oldId) {
         'dashboard': 'screen-home',
         'polos': 'screen-polos-grid',
         'newPolo': 'screen-cadastro-polo',
+        'screen-amigos-list': 'screen-amigos-list',
         'newVisita': 'visitas',
         'newTarefa': 'tarefas'
     };
     const target = map[oldId] || oldId;
     navigateTo(target);
+}
+
+function MapsTo(screenId, area) {
+    if (area === 'POLOS') {
+        navigateTo(screenId, { force: true });
+        return;
+    }
+
+    if (area === 'AMIGOS') {
+        navigateTo(screenId, { force: true });
+        renderAmigos();
+        return;
+    }
+
+    if (area === 'VISITAS') {
+        navigateTo(screenId, { force: true });
+        renderVisitas();
+        return;
+    }
+
+    if (area === 'TAREFAS') {
+        navigateTo(screenId, { force: true });
+        renderTarefas();
+        return;
+    }
+
+    navigateTo(screenId, { force: true });
 }
 
 // ===== BANCO DE DADOS =====
@@ -128,7 +167,7 @@ function initializeDatabase() {
             console.log('Banco de dados inicializado com sucesso');
             // Atualizar contadores e telas iniciais
             renderPolos();
-            updateCounts();
+            atualizarDashboard();
         })
         .catch(function(error) {
             console.error('Erro ao inicializar banco de dados', error);
@@ -305,7 +344,7 @@ function renderPolos() {
         for (let i = 0; i < result.rows.length; i++) {
             const row = result.rows.item(i);
             html += '<div class="col-12 col-md-6">';
-            html += '<div class="card" style="cursor:pointer;" onclick="navigateTo(\'screen-amigos-list\');">';
+            html += '<div class="card" style="cursor:pointer;" onclick="MapsTo(\'screen-amigos-list\', \'AMIGOS\');">';
             html += '<div class="card-body">';
             html += '<h5 class="card-title">' + escapeHtml(row.nome) + '</h5>';
             if (row.telefone) html += '<p class="card-text small text-muted">' + escapeHtml(row.telefone) + '</p>';
@@ -314,7 +353,7 @@ function renderPolos() {
 
         container.innerHTML = html || '<div class="col-12"><p class="text-muted">Nenhum polo cadastrado.</p></div>';
         hideSpinner();
-        updateCounts();
+        atualizarDashboard();
     }).catch(function(err) {
         console.error('Erro ao carregar polos', err);
         container.innerHTML = '<div class="col-12"><p class="text-danger">Erro ao carregar polos.</p></div>';
@@ -322,30 +361,153 @@ function renderPolos() {
     });
 }
 
+function atualizarDashboard() {
+    const queries = [
+        {
+            sql: 'SELECT COUNT(*) AS total FROM polos',
+            targetIds: ['dash-polos-count', 'countPolos']
+        },
+        {
+            sql: 'SELECT COUNT(*) AS total FROM amigos',
+            targetIds: ['dash-amigos-count', 'countAmigos']
+        },
+        {
+            sql: "SELECT COUNT(*) AS total FROM visitas WHERE data_visita <= date('now')",
+            targetIds: ['dash-visitas-count', 'countVisitas']
+        },
+        {
+            sql: "SELECT COUNT(*) AS total FROM tarefas WHERE status = 'Pendente' OR data_prazo > date('now')",
+            targetIds: ['dash-alertas-count', 'countTarefas']
+        }
+    ];
+
+    const formatter = function(result) {
+        return (result.rows && result.rows.length) ? result.rows.item(0).total : 0;
+    };
+
+    return Promise.all(queries.map(function(query) {
+        return runSql(query.sql).then(function(result) {
+            const total = formatter(result);
+            query.targetIds.forEach(function(targetId) {
+                const el = document.getElementById(targetId);
+                if (el) el.textContent = total;
+            });
+            return total;
+        }).catch(function(error) {
+            console.error('Erro ao atualizar dashboard', query.sql, error);
+            query.targetIds.forEach(function(targetId) {
+                const el = document.getElementById(targetId);
+                if (el) el.textContent = '0';
+            });
+            return 0;
+        });
+    })).then(function(values) {
+        const hint = document.getElementById('dashboard-hint');
+        if (hint) {
+            hint.textContent = 'Polos: ' + values[0] + ' | Amigos: ' + values[1] + ' | Visitas realizadas: ' + values[2] + ' | Pendências: ' + values[3];
+        }
+        return values;
+    });
+}
+
 function updateCounts() {
-    runSql('SELECT COUNT(*) AS total FROM polos').then(function(res) {
-        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
-        const el = document.getElementById('countPolos');
-        if (el) el.textContent = total;
-    });
+    return atualizarDashboard();
+}
 
-    runSql('SELECT COUNT(*) AS total FROM amigos').then(function(res) {
-        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
-        const el = document.getElementById('countAmigos');
-        if (el) el.textContent = total;
-    });
+function renderAmigos() {
+    const container = document.getElementById('amigosList');
+    if (!container) return;
 
-    runSql('SELECT COUNT(*) AS total FROM visitas').then(function(res) {
-        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
-        const el = document.getElementById('countVisitas');
-        if (el) el.textContent = total;
-    });
+    showSpinner();
 
-    runSql('SELECT COUNT(*) AS total FROM tarefas').then(function(res) {
-        const total = (res.rows && res.rows.length) ? res.rows.item(0).total : 0;
-        const el = document.getElementById('countTarefas');
-        if (el) el.textContent = total;
+    runSql(
+        'SELECT amigos.id, amigos.nome, amigos.telefone, amigos.data_nascimento, polos.nome AS polo_nome ' +
+        'FROM amigos LEFT JOIN polos ON polos.id = amigos.polo_id ORDER BY amigos.nome ASC'
+    ).then(function(result) {
+        let html = '';
+
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const row = result.rows.item(i);
+            html += '<div class="list-group-item">';
+            html += '<div class="fw-semibold">' + escapeHtml(row.nome) + '</div>';
+            html += '<div class="small text-muted">Polo: ' + escapeHtml(row.polo_nome || 'Sem vínculo') + '</div>';
+            if (row.telefone) html += '<div class="small text-muted">' + escapeHtml(row.telefone) + '</div>';
+            html += '</div>';
+        }
+
+        container.innerHTML = html || '<div class="list-group-item text-muted">Nenhum amigo cadastrado.</div>';
+        hideSpinner();
+    }).catch(function(err) {
+        console.error('Erro ao carregar amigos', err);
+        container.innerHTML = '<div class="list-group-item text-danger">Erro ao carregar amigos.</div>';
+        hideSpinner();
     });
+}
+
+function renderVisitas() {
+    const container = document.getElementById('visitasList');
+    if (!container) return;
+
+    showSpinner();
+
+    runSql('SELECT id, tipo_pessoa, motivo, data_visita, observacoes FROM visitas ORDER BY data_visita DESC, id DESC').then(function(result) {
+        let html = '';
+
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const row = result.rows.item(i);
+            html += '<div class="list-group-item">';
+            html += '<div class="fw-semibold">' + escapeHtml(row.motivo || 'Visita sem título') + '</div>';
+            html += '<div class="small text-muted">' + escapeHtml(row.tipo_pessoa || '') + ' · ' + escapeHtml(row.data_visita || '') + '</div>';
+            if (row.observacoes) html += '<div class="small text-muted">' + escapeHtml(row.observacoes) + '</div>';
+            html += '</div>';
+        }
+
+        container.innerHTML = html || '<div class="list-group-item text-muted">Nenhuma visita registrada.</div>';
+        hideSpinner();
+    }).catch(function(err) {
+        console.error('Erro ao carregar visitas', err);
+        container.innerHTML = '<div class="list-group-item text-danger">Erro ao carregar visitas.</div>';
+        hideSpinner();
+    });
+}
+
+function renderTarefas() {
+    const container = document.getElementById('tarefasList');
+    if (!container) return;
+
+    showSpinner();
+
+    runSql('SELECT id, titulo, descricao, data_prazo, status FROM tarefas ORDER BY CASE WHEN status = "Pendente" THEN 0 ELSE 1 END, data_prazo ASC, id DESC').then(function(result) {
+        let html = '';
+
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const row = result.rows.item(i);
+            const isPending = String(row.status || '').toLowerCase() === 'pendente';
+            html += '<div class="list-group-item">';
+            html += '<div class="d-flex justify-content-between align-items-start gap-2">';
+            html += '<div>';
+            html += '<div class="fw-semibold">' + escapeHtml(row.titulo || 'Tarefa sem título') + '</div>';
+            if (row.descricao) html += '<div class="small text-muted">' + escapeHtml(row.descricao) + '</div>';
+            html += '</div>';
+            html += '<span class="badge ' + (isPending ? 'text-bg-danger' : 'text-bg-success') + '">' + escapeHtml(row.status || 'Pendente') + '</span>';
+            html += '</div>';
+            if (row.data_prazo) html += '<div class="small text-muted mt-1">Prazo: ' + escapeHtml(row.data_prazo) + '</div>';
+            html += '</div>';
+        }
+
+        container.innerHTML = html || '<div class="list-group-item text-muted">Nenhuma tarefa cadastrada.</div>';
+        hideSpinner();
+    }).catch(function(err) {
+        console.error('Erro ao carregar tarefas', err);
+        container.innerHTML = '<div class="list-group-item text-danger">Erro ao carregar tarefas.</div>';
+        hideSpinner();
+    });
+}
+
+function applyNativeChrome() {
+    if (window.StatusBar) {
+        StatusBar.backgroundColorByHexString('#0a5ecf');
+    }
 }
 
 function showSpinner() {

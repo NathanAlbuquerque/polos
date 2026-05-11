@@ -30,17 +30,26 @@ body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color:#E4E4E4;
-    background-image:linear-gradient(to bottom, #A7A7A7 0%, #E4E4E4 51%);
-    font-family: system-ui, -apple-system, -apple-system-font, 'Segoe UI', 'Roboto', sans-serif;
-    font-size:12px;
+    --app-primary: #0a5ecf;
+    --app-primary-soft: #41b7ff;
+    --app-success: #01bc62;
+    --app-danger: #ad0b0b;
+    --app-surface: #f5f8fc;
+    --app-surface-strong: #ffffff;
+    --app-text: #17324d;
+    --app-muted: #5f7286;
+    background-color: var(--app-surface);
+    background-image: radial-gradient(circle at top left, rgba(65, 183, 255, 0.14), transparent 32%), linear-gradient(180deg, #f9fbfe 0%, #eef4fb 100%);
+    color: var(--app-text);
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:16px;
     height:100vh;
     margin:0px;
     padding:0px;
     /* Padding to avoid the "unsafe" areas behind notches in the screen */
     padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     text-size-adjust: none;
-    text-transform:uppercase;
+    text-transform:none;
     user-select: none;
     width:100%;
 }
@@ -136,4 +145,127 @@ h1 {
 
 /* Ajustes responsivos para títulos */
 #page-title { font-size: 1.05rem; margin: 0; }
+
+.app-navbar {
+    background: linear-gradient(135deg, var(--app-primary), #0849a5);
+    box-shadow: 0 8px 24px rgba(10, 94, 207, 0.22);
+}
+
+.dashboard-summary,
+.section-panel {
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(10, 94, 207, 0.08);
+    border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(23, 50, 77, 0.08);
+    backdrop-filter: blur(8px);
+    padding: 1.1rem 1.15rem;
+}
+
+.dashboard-kicker,
+.section-subtitle {
+    color: var(--app-muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.dashboard-headline,
+.section-title {
+    color: var(--app-text);
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.dashboard-hint {
+    color: var(--app-muted);
+    font-size: 0.98rem;
+}
+
+.dashboard-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 168px;
+    padding: 1.1rem 1rem 1rem;
+    border: 0;
+    border-radius: 24px;
+    color: #fff;
+    box-shadow: 0 18px 36px rgba(23, 50, 77, 0.14);
+    transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+}
+
+.dashboard-card:active {
+    transform: translateY(1px) scale(0.99);
+    filter: brightness(0.98);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 42px rgba(23, 50, 77, 0.18);
+}
+
+.dashboard-card-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.dashboard-card-icon svg {
+    width: 1.45rem;
+    height: 1.45rem;
+    fill: currentColor;
+}
+
+.dashboard-card-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.92;
+}
+
+.dashboard-card-value {
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-top: 0.15rem;
+}
+
+.dashboard-card-footnote {
+    margin-top: auto;
+    font-size: 0.92rem;
+    opacity: 0.9;
+}
+
+.dashboard-card-polos {
+    background: linear-gradient(145deg, #0a5ecf, #08449b);
+}
+
+.dashboard-card-amigos {
+    background: linear-gradient(145deg, #41b7ff, #1382d4);
+}
+
+.dashboard-card-visitas {
+    background: linear-gradient(145deg, #01bc62, #0a8b4b);
+}
+
+.dashboard-card-alertas {
+    background: linear-gradient(145deg, #ad0b0b, #7f0707);
+}
+
+.dashboard-icon-polos,
+.dashboard-icon-amigos,
+.dashboard-icon-visitas,
+.dashboard-icon-alertas {
+    color: #fff;
+}
+
+.list-group-item {
+    border-color: rgba(10, 94, 207, 0.08);
+}
 

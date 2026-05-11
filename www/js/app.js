@@ -73,6 +73,9 @@ function navigateTo(screenId, opts) {
         if (screenId === 'screen-polos-grid') {
             renderPolos();
         }
+        if (screenId === 'screen-polo-detalhes') {
+            renderPoloDetails();
+        }
         if (screenId === 'screen-amigos-list') {
             renderAmigos();
         }
@@ -108,6 +111,7 @@ function showScreen(oldId) {
         'dashboard': 'screen-home',
         'polos': 'screen-polos-grid',
         'newPolo': 'screen-cadastro-polo',
+        'screen-polo-detalhes': 'screen-polo-detalhes',
         'screen-amigos-list': 'screen-amigos-list',
         'newVisita': 'visitas',
         'newTarefa': 'tarefas'
@@ -161,6 +165,9 @@ function initializeDatabase() {
             return createSchema();
         })
         .then(function() {
+            return ensurePoloPhotoColumn();
+        })
+        .then(function() {
             return inserirDadosTeste();
         })
         .then(function() {
@@ -183,7 +190,7 @@ function createSchema() {
             'endereco TEXT,' +
             'data_nascimento TEXT,' +
             'observacoes TEXT,' +
-            'foto_url TEXT,' +
+            'foto TEXT,' +
             'criado_em TEXT DEFAULT CURRENT_TIMESTAMP' +
         ')',
         'CREATE TABLE IF NOT EXISTS amigos (' +
@@ -222,6 +229,26 @@ function createSchema() {
     ];
 
     return executeStatements(statements);
+}
+
+function ensurePoloPhotoColumn() {
+    return runSql('PRAGMA table_info(polos)').then(function(result) {
+        let hasFoto = false;
+
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const column = result.rows.item(i);
+            if (column.name === 'foto') {
+                hasFoto = true;
+                break;
+            }
+        }
+
+        if (hasFoto) {
+            return null;
+        }
+
+        return runSql('ALTER TABLE polos ADD COLUMN foto TEXT');
+    });
 }
 
 function runSql(sql, params) {
@@ -338,17 +365,22 @@ function renderPolos() {
 
     showSpinner();
 
-    runSql('SELECT id, nome, telefone, endereco, data_nascimento FROM polos ORDER BY id DESC').then(function(result) {
+    runSql(
+        'SELECT p.id, p.nome, p.telefone, p.endereco, p.data_nascimento, p.foto, COUNT(a.id) AS total_amigos ' +
+        'FROM polos p LEFT JOIN amigos a ON p.id = a.polo_id GROUP BY p.id ORDER BY p.nome ASC'
+    ).then(function(result) {
         let html = '';
 
         for (let i = 0; i < result.rows.length; i++) {
             const row = result.rows.item(i);
-            html += '<div class="col-12 col-md-6">';
-            html += '<div class="card" style="cursor:pointer;" onclick="MapsTo(\'screen-amigos-list\', \'AMIGOS\');">';
-            html += '<div class="card-body">';
-            html += '<h5 class="card-title">' + escapeHtml(row.nome) + '</h5>';
-            if (row.telefone) html += '<p class="card-text small text-muted">' + escapeHtml(row.telefone) + '</p>';
-            html += '</div></div></div>';
+            const photoMarkup = renderPoloPhoto(row.nome, row.foto);
+            html += '<div class="col-6">';
+            html += '<button type="button" class="polo-card w-100 text-start" onclick="verDetalhesPolo(' + row.id + ')">';
+            html += '<div class="polo-card-photo">' + photoMarkup + '</div>';
+            html += '<div class="polo-card-body">';
+            html += '<div class="polo-card-name">' + escapeHtml(row.nome) + '</div>';
+            html += '<div class="polo-card-meta">' + escapeHtml(String(row.total_amigos || 0)) + ' amigos</div>';
+            html += '</div></button></div>';
         }
 
         container.innerHTML = html || '<div class="col-12"><p class="text-muted">Nenhum polo cadastrado.</p></div>';
@@ -407,6 +439,85 @@ function atualizarDashboard() {
             hint.textContent = 'Polos: ' + values[0] + ' | Amigos: ' + values[1] + ' | Visitas realizadas: ' + values[2] + ' | Pendências: ' + values[3];
         }
         return values;
+    });
+}
+
+function renderPoloPhoto(nome, foto) {
+    if (foto) {
+        return '<img class="polo-photo-circle" src="' + escapeHtml(foto) + '" alt="Foto de ' + escapeHtml(nome) + '">';
+    }
+
+    const initial = escapeHtml((nome || '?').trim().charAt(0).toUpperCase() || '?');
+    return '<div class="polo-photo-placeholder" aria-hidden="true">' + initial + '</div>';
+}
+
+function verDetalhesPolo(id) {
+    if (!id) return;
+
+    const target = document.getElementById('screen-polo-detalhes');
+    if (target) {
+        target.setAttribute('data-polo-id', String(id));
+    }
+
+    navigateTo('screen-polo-detalhes', { force: true });
+    renderPoloDetails();
+}
+
+function renderPoloDetails() {
+    const container = document.getElementById('poloDetalhesContent');
+    if (!container) return;
+
+    const screen = document.getElementById('screen-polo-detalhes');
+    const poloId = screen ? screen.getAttribute('data-polo-id') : '';
+
+    if (!poloId) {
+        container.innerHTML = '<div class="alert alert-warning mb-0">Selecione um Polo primeiro.</div>';
+        return;
+    }
+
+    showSpinner();
+
+    runSql(
+        'SELECT p.id, p.nome, p.telefone, p.endereco, p.data_nascimento, p.observacoes, p.foto, ' +
+        '(SELECT COUNT(*) FROM amigos a WHERE a.polo_id = p.id) AS total_amigos, ' +
+        '(SELECT v.data_visita FROM visitas v WHERE v.pessoa_id = p.id AND v.tipo_pessoa = "POLOS" ORDER BY v.data_visita DESC, v.id DESC LIMIT 1) AS ultima_visita ' +
+        'FROM polos p WHERE p.id = ? LIMIT 1',
+        [poloId]
+    ).then(function(result) {
+        if (!result.rows || !result.rows.length) {
+            container.innerHTML = '<div class="alert alert-warning mb-0">Polo não encontrado.</div>';
+            hideSpinner();
+            return;
+        }
+
+        const row = result.rows.item(0);
+        const html = [];
+
+        html.push('<div class="polo-detail-hero">');
+        html.push('<div class="polo-detail-photo">' + renderPoloPhoto(row.nome, row.foto) + '</div>');
+        html.push('<div class="polo-detail-copy">');
+        html.push('<div class="polo-detail-name">' + escapeHtml(row.nome) + '</div>');
+        html.push('<div class="polo-detail-meta">' + escapeHtml(String(row.total_amigos || 0)) + ' amigos vinculados</div>');
+        html.push('</div></div>');
+
+        html.push('<div class="detail-panel">');
+        html.push('<div class="detail-row"><span class="detail-label">Telefone</span><span class="detail-value">' + escapeHtml(row.telefone || 'Não informado') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Endereço</span><span class="detail-value">' + escapeHtml(row.endereco || 'Não informado') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Última Visita</span><span class="detail-value">' + escapeHtml(row.ultima_visita || 'Sem registros') + '</span></div>');
+        if (row.observacoes) {
+            html.push('<div class="detail-row detail-row-stack"><span class="detail-label">Observações</span><span class="detail-value">' + escapeHtml(row.observacoes) + '</span></div>');
+        }
+        html.push('</div>');
+
+        html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="MapsTo(\'screen-amigos-list\', \'AMIGOS\')">Listar Amigos</button>');
+        html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-polos-grid\')">Voltar para Polos</button>');
+
+        container.innerHTML = html.join('');
+        hideSpinner();
+    }).catch(function(err) {
+        console.error('Erro ao carregar detalhes do polo', err);
+        container.innerHTML = '<div class="alert alert-danger mb-0">Erro ao carregar detalhes do polo.</div>';
+        hideSpinner();
     });
 }
 

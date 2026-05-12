@@ -112,7 +112,7 @@ h1 {
 .btn-back-app {
     border: 0;
     border-radius: 999px;
-    padding: 0.6rem 0.95rem;
+    padding: 0.55rem 0.95rem;
     font-weight: 800;
     color: #fff;
     background: linear-gradient(135deg, #0a5ecf, #08449b);
@@ -126,13 +126,26 @@ h1 {
 
 .btn-back-app .back-arrow {
     display: inline-flex;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: auto;
+    height: auto;
     align-items: center;
     justify-content: center;
-    margin-right: 0.35rem;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.16);
+    margin-right: 0.45rem;
+    font-size: 1.55rem;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.form-control,
+.form-select {
+    min-height: 3rem;
+    font-size: 1.04rem;
+    padding-top: 0.72rem;
+    padding-bottom: 0.72rem;
+}
+
+textarea.form-control {
+    min-height: 7.2rem;
 }
 
 .btn-circle-white {

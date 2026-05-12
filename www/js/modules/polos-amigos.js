@@ -154,7 +154,8 @@ function renderPoloDetails() {
 
         html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="abrirAmigosDoPolo(' + row.id + ')">Listar Amigos</button>');
         html.push('<button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="abrirCadastroAmigo(' + row.id + ')">Adicionar Amigo</button>');
-        html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-polos-grid\')">Voltar para Polos</button>');
+        html.push('<button type="button" class="btn btn-outline-danger w-100 mb-2" onclick="deletarPolo(' + row.id + ', \'' + escapeHtml(row.nome).replace(/'/g, "\\\'")+  '\')" >Deletar Polo</button>');
+        html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-polos-grid\', { replace: true })">Voltar para Polos</button>');
 
         container.innerHTML = html.join('');
         hideSpinner();
@@ -210,7 +211,7 @@ function carregarAmigos(poloId) {
             }
             html += '</div>';
             html += '<div class="friend-actions">';
-            html += '<button type="button" class="btn btn-sm btn-outline-primary" onclick="abrirCadastroAmigo(' + row.polo_id + ')">Novo</button>';
+            html += '<button type="button" class="btn btn-sm btn-outline-info" onclick="editarAmigo(' + row.id + ')">Editar</button>';
             html += '<button type="button" class="btn btn-sm btn-outline-danger" data-nome="' + escapeHtml(row.nome).replace(/"/g, '&quot;') + '" onclick="removerAmigo(' + row.id + ', this.dataset.nome)">Excluir</button>';
             html += '</div></div>';
         }
@@ -293,10 +294,10 @@ function salvarNovoAmigo() {
         .then(function() {
             const form = document.getElementById('formNovoAmigo');
             if (form) form.reset();
-            navigateTo('screen-amigos-list', { force: true });
-            carregarAmigos(poloId);
             atualizarDashboard();
             showToast('Salvo com sucesso!');
+            navigateTo('screen-amigos-list', { force: true, replace: true });
+            carregarAmigos(poloId);
         })
         .catch(function(err) {
             console.error('Erro ao inserir amigo', err);
@@ -347,13 +348,71 @@ function inserirNovoPolo() {
         .then(function() {
             const form = document.getElementById('formNovoPolo');
             if (form) form.reset();
-            navigateTo('screen-polos-grid');
-            renderPolos();
             showToast('Salvo com sucesso!');
+            navigateTo('screen-polos-grid', { force: true, replace: true });
+            renderPolos();
+            atualizarDashboard();
         })
         .catch(function(err) {
             console.error('Erro ao inserir polo', err);
             showFriendlyError('salvar-polo');
+        });
+}
+
+function editarAmigo(amigoId) {
+    if (!amigoId) return;
+
+    runSql('SELECT * FROM amigos WHERE id = ? LIMIT 1', [amigoId]).then(function(result) {
+        if (!result.rows || !result.rows.length) {
+            showToast('Amigo não encontrado');
+            return;
+        }
+
+        const amigo = result.rows.item(0);
+        navigateTo('screen-cadastro-amigo', { force: true });
+        initializeAmigoForm(amigo.polo_id);
+        
+        setTimeout(function() {
+            const form = document.getElementById('formNovoAmigo');
+            if (form) {
+                form.dataset.editingId = String(amigoId);
+                const titulo = form.previousElementSibling ? form.previousElementSibling.querySelector('h3') : null;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.textContent = 'Salvar Amigo';
+                form.onsubmit = function(ev) {
+                    ev.preventDefault();
+                    salvarNovoAmigo();
+                };
+            }
+            document.getElementById('amigoNome').value = amigo.nome || '';
+            document.getElementById('amigoTelefone').value = amigo.telefone || '';
+            document.getElementById('amigoObs').value = amigo.observacoes || '';
+            document.getElementById('amigoPolo').value = amigo.polo_id;
+        }, 10);
+    }).catch(function(err) {
+        console.error('Erro ao carregar amigo para edição', err);
+        showFriendlyError('editar-amigo');
+    });
+}
+
+function deletarPolo(poloId, nomePolo) {
+    if (!poloId) return;
+
+    const confirmation = confirm('Deseja remover o Polo "' + nomePolo + '"? Todos os amigos vinculados e seus registros de visitas/tarefas também serão removidos.');
+    if (!confirmation) {
+        return;
+    }
+
+    runSql('DELETE FROM polos WHERE id = ?', [poloId])
+        .then(function() {
+            navigateTo('screen-polos-grid', { force: true, replace: true });
+            renderPolos();
+            atualizarDashboard();
+            showToast('Polo removido com sucesso!');
+        })
+        .catch(function(err) {
+            console.error('Erro ao remover polo', err);
+            showFriendlyError('deletar-polo');
         });
 }
 

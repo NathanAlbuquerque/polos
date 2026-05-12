@@ -46,8 +46,8 @@ body {
     height:100vh;
     margin:0px;
     padding:0px;
-    /* Padding to avoid the "unsafe" areas behind notches in the screen */
-    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    /* Mantem apenas bordas laterais/inferior para evitar espaco vazio no topo */
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     text-size-adjust: none;
     text-transform:none;
     user-select: none;
@@ -174,6 +174,8 @@ h1 {
     background: rgba(255, 255, 255, 0.92);
     box-shadow: 0 12px 28px rgba(23, 50, 77, 0.08);
     transition: transform 140ms ease, box-shadow 140ms ease;
+    content-visibility: auto;
+    contain: content;
 }
 
 .polo-card:active {
@@ -198,6 +200,8 @@ h1 {
 .polo-photo-placeholder {
     width: 84px;
     height: 84px;
+    max-width: 84px;
+    max-height: 84px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(10, 94, 207, 0.18);
@@ -360,45 +364,6 @@ h1 {
 
     .detail-value {
         text-align: left;
-    }
-}
-
-.event {
-    border-radius:4px;
-    color:#FFFFFF;
-    font-size:12px;
-    margin:0px 30px;
-    padding:2px 0px;
-}
-
-.event.listening {
-    background-color:#333333;
-    display:block;
-}
-
-.event.received {
-    background-color:#4B946A;
-    display:none;
-}
-
-#deviceready.ready .event.listening { display: none; }
-#deviceready.ready .event.received { display: block; }
-
-@keyframes fade {
-    from { opacity: 1.0; }
-    50% { opacity: 0.4; }
-    to { opacity: 1.0; }
-}
-
-.blink {
-    -webkit-animation:fade 3000ms infinite;
-    animation:fade 3000ms infinite;
-}
-
-
-@media screen and (prefers-color-scheme: dark) {
-    body {
-        background-image:linear-gradient(to bottom, #585858 0%, #1B1B1B 51%);
     }
 }
 
@@ -622,7 +587,6 @@ h1 {
     width: 100%;
     text-align:center;
 }
-}
 
 .polo-card-name {
     color: #0a5ecf;
@@ -730,5 +694,27 @@ h1 {
     .detail-value {
         text-align: left;
     }
+}
+
+.app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(0, 0, 0, 0.88);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.62rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease, transform 180ms ease;
+    z-index: 2200;
+}
+
+.app-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 

@@ -11,6 +11,20 @@ let selectedTaskPerson = null;
 let selectedVisitId = null;
 let taskPrefill = null;
 
+const FLATPICKR_PT_BR = {
+    weekdays: {
+        shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'],
+        longhand: ['Domingo', 'Segunda-feira', 'Terca-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sabado']
+    },
+    months: {
+        shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        longhand: ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    },
+    firstDayOfWeek: 1,
+    rangeSeparator: ' a ',
+    time_24hr: true
+};
+
 function onDeviceReady() {
     console.log('App ready');
     try { console.log('Platform: ' + device.platform); console.log('OS Version: ' + device.version); } catch (e) {}
@@ -521,7 +535,7 @@ function atualizarDashboard() {
 
 function renderPoloPhoto(nome, foto) {
     if (foto) {
-        return '<img class="polo-photo-circle" src="' + escapeHtml(foto) + '" alt="Foto de ' + escapeHtml(nome) + '">';
+        return '<img class="polo-photo-circle" src="' + escapeHtml(foto) + '" alt="Foto de ' + escapeHtml(nome) + '" loading="lazy" decoding="async">';
     }
 
     const initial = escapeHtml((nome || '?').trim().charAt(0).toUpperCase() || '?');
@@ -701,6 +715,8 @@ function initializeAmigoForm(selectedPoloId) {
             altInput: true,
             altFormat: 'd/m/Y',
             allowInput: true,
+            locale: FLATPICKR_PT_BR,
+            position: 'auto bottom',
             maxDate: 'today'
         });
     }
@@ -742,10 +758,11 @@ function salvarNovoAmigo() {
             navigateTo('screen-amigos-list', { force: true });
             carregarAmigos(poloId);
             atualizarDashboard();
+            showToast('Salvo com sucesso!');
         })
         .catch(function(err) {
             console.error('Erro ao inserir amigo', err);
-            alert('Erro ao salvar amigo');
+            showFriendlyError('salvar-amigo');
         });
 }
 
@@ -767,17 +784,12 @@ function removerAmigo(amigoId, nomeAmigo) {
         .then(function() {
             carregarAmigos(amigoListFilterPoloId);
             atualizarDashboard();
+            showToast('Amigo removido com sucesso!');
         })
         .catch(function(err) {
             console.error('Erro ao remover amigo', err);
-            alert('Erro ao remover amigo');
+            showFriendlyError('remover-amigo');
         });
-}
-
-function renderVisitas() {
-    const container = document.getElementById('visitasList');
-        throw err;
-    });
 }
 
 function carregarPessoasVisitadas(selectId, selectedValue) {
@@ -827,6 +839,7 @@ function initializeVisitForm(selectedValue) {
             altInput: true,
             altFormat: 'd/m/Y',
             allowInput: true,
+            locale: FLATPICKR_PT_BR,
             position: 'auto bottom',
             maxDate: 'today'
         });
@@ -863,10 +876,11 @@ function salvarNovaVisita() {
             selectedVisitPerson = null;
             navigateTo('visitas', { force: true });
             atualizarDashboard();
+            showToast('Salvo com sucesso!');
         })
         .catch(function(err) {
             console.error('Erro ao salvar visita', err);
-            alert('Erro ao salvar visita');
+            showFriendlyError('salvar-visita');
         });
 }
 
@@ -1027,6 +1041,7 @@ function initializeTaskForm(selectedValue, prefill) {
             altInput: true,
             altFormat: 'd/m/Y',
             allowInput: true,
+            locale: FLATPICKR_PT_BR,
             position: 'auto bottom',
             minDate: 'today'
         });
@@ -1077,10 +1092,11 @@ function salvarNovaTarefa() {
             taskPrefill = null;
             navigateTo('tarefas', { force: true });
             atualizarDashboard();
+            showToast('Salvo com sucesso!');
         })
         .catch(function(err) {
             console.error('Erro ao salvar tarefa', err);
-            alert('Erro ao salvar tarefa');
+            showFriendlyError('salvar-tarefa');
         });
 }
 
@@ -1091,10 +1107,11 @@ function concluirTarefa(tarefaId) {
         .then(function() {
             renderTarefas();
             atualizarDashboard();
+            showToast('Tarefa concluida com sucesso!');
         })
         .catch(function(err) {
             console.error('Erro ao concluir tarefa', err);
-            alert('Erro ao concluir tarefa');
+            showFriendlyError('concluir-tarefa');
         });
 }
 
@@ -1177,10 +1194,11 @@ function inserirNovoPolo() {
             // navegar para lista de polos e recarregar
             navigateTo('screen-polos-grid');
             renderPolos();
+            showToast('Salvo com sucesso!');
         })
         .catch(function(err) {
             console.error('Erro ao inserir polo', err);
-            alert('Erro ao salvar polo');
+            showFriendlyError('salvar-polo');
         });
 }
 
@@ -1203,9 +1221,40 @@ function initializePoloForm() {
             altInput: true,
             altFormat: 'd/m/Y',
             allowInput: true,
+            locale: FLATPICKR_PT_BR,
+            position: 'auto bottom',
             maxDate: 'today'
         });
     }
+}
+
+function showFriendlyError(context) {
+    const messages = {
+        'salvar-polo': 'Ops, nao conseguimos salvar o Polo agora. Verifique o espaco no celular e tente novamente.',
+        'salvar-amigo': 'Ops, nao conseguimos salvar o Amigo agora. Verifique os dados e tente novamente.',
+        'salvar-visita': 'Ops, nao conseguimos salvar a Visita agora. Tente novamente em instantes.',
+        'salvar-tarefa': 'Ops, nao conseguimos salvar a Tarefa agora. Tente novamente em instantes.',
+        'concluir-tarefa': 'Ops, nao conseguimos concluir a tarefa agora. Tente novamente.',
+        'remover-amigo': 'Ops, nao conseguimos remover o Amigo agora. Tente novamente em instantes.'
+    };
+
+    alert(messages[context] || 'Ops, ocorreu um erro inesperado.');
+}
+
+function showToast(message) {
+    const toast = document.getElementById('appToast');
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.classList.add('show');
+
+    if (showToast._timer) {
+        clearTimeout(showToast._timer);
+    }
+
+    showToast._timer = setTimeout(function() {
+        toast.classList.remove('show');
+    }, 2200);
 }
 
 function formatPhoneInput(event) {

@@ -14,6 +14,8 @@
     <preference name="StatusBarBackgroundColor" value="#0a5ecf" />
     <preference name="StatusBarStyle" value="lightcontent" />
     <preference name="ShowSplashScreenSpinner" value="false" />
+    <preference name="SplashScreenDelay" value="0" />
+    <preference name="AutoHideSplashScreen" value="true" />
 
     <!-- Access Rules -->
     <allow-intent href="http://*/*" />

@@ -73,7 +73,7 @@ mirror:
 	scrcpy --always-on-top
 
 # ===== INSTALLATION =====
-install: build
+install: #build
 	@echo "📥 Instalando APK..."
 	adb install -r $(APK_PATH)
 	@echo "✅ Instalado!"

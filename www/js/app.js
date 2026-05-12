@@ -357,18 +357,18 @@ function inserirDadosTeste() {
 
         const polosTeste = [
             {
-                nome: 'Polo Central',
+                nome: 'Maria Silva',
                 telefone: '(11) 91234-5678',
-                endereco: 'Rua Central, 100',
-                data_nascimento: '2026-05-06',
-                observacoes: 'Polo principal de teste'
+                endereco: 'Rua das Flores, 100',
+                data_nascimento: '1975-03-15',
+                observacoes: 'Líder da rede de contatos'
             },
             {
-                nome: 'Polo Norte',
+                nome: 'João Santos',
                 telefone: '(11) 99876-5432',
-                endereco: 'Avenida Norte, 250',
-                data_nascimento: '2026-05-06',
-                observacoes: 'Segundo polo de validacao'
+                endereco: 'Avenida Principal, 250',
+                data_nascimento: '1980-07-22',
+                observacoes: 'Coordenador regional'
             }
         ];
 
@@ -400,11 +400,11 @@ function inserirDadosTeste() {
             }
 
             const amigosTeste = [
-                { poloIndex: 0, nome: 'Ana Souza', telefone: '(11) 98888-1111', data_nascimento: '2026-05-06', observacoes: 'Contato de referencia' },
-                { poloIndex: 0, nome: 'Bruno Lima', telefone: '(11) 97777-2222', data_nascimento: '2026-05-06', observacoes: 'Primeiro amigo vinculado' },
-                { poloIndex: 0, nome: 'Carla Mendes', telefone: '(11) 96666-3333', data_nascimento: '2026-05-06', observacoes: 'Testando relacionamento' },
-                { poloIndex: 1, nome: 'Diego Alves', telefone: '(11) 95555-4444', data_nascimento: '2026-05-06', observacoes: 'Amigo do segundo polo' },
-                { poloIndex: 1, nome: 'Eva Rocha', telefone: '(11) 94444-5555', data_nascimento: '2026-05-06', observacoes: 'Amigo de validacao' }
+                { poloIndex: 0, nome: 'Ana Souza', telefone: '(11) 98888-1111', data_nascimento: '1985-05-10', observacoes: 'Amiga de longa data' },
+                { poloIndex: 0, nome: 'Bruno Lima', telefone: '(11) 97777-2222', data_nascimento: '1982-08-20', observacoes: 'Colega de trabalho' },
+                { poloIndex: 0, nome: 'Carla Mendes', telefone: '(11) 96666-3333', data_nascimento: '1988-11-15', observacoes: 'Vizinha próxima' },
+                { poloIndex: 1, nome: 'Diego Alves', telefone: '(11) 95555-4444', data_nascimento: '1979-02-28', observacoes: 'Amigo desde a faculdade' },
+                { poloIndex: 1, nome: 'Eva Rocha', telefone: '(11) 94444-5555', data_nascimento: '1986-09-03', observacoes: 'Membro do grupo de vol' }
             ];
 
             return amigosTeste.reduce(function(chain, amigo) {

@@ -142,10 +142,27 @@ h1 {
     font-size: 1.04rem;
     padding-top: 0.72rem;
     padding-bottom: 0.72rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(10, 94, 207, 0.25);
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(10, 94, 207, 0.08) inset;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(10, 94, 207, 0.55) !important;
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 6px 16px rgba(10, 94, 207, 0.15);
+}
+
+.form-control::placeholder {
+    color: rgba(95, 114, 134, 0.6);
 }
 
 textarea.form-control {
     min-height: 7.2rem;
+    resize: vertical;
 }
 
 .btn-circle-white {

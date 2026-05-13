@@ -748,3 +748,90 @@ textarea.form-control {
     transform: translateX(-50%) translateY(0);
 }
 
+.btn {
+    font-size: 1.04rem;
+    font-weight: 700;
+}
+
+.btn.btn-sm {
+    font-size: 0.95rem;
+}
+
+.dashboard-card,
+.dashboard-card * {
+    font-size: inherit;
+}
+
+.btn-photo-picker {
+    border-style: dashed;
+    border-width: 2px;
+}
+
+.photo-preview-wrap {
+    border-radius: 16px;
+    border: 1px solid rgba(10, 94, 207, 0.2);
+    padding: 0.55rem;
+    background: rgba(255, 255, 255, 0.82);
+}
+
+.photo-preview-img {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+
+.calendar-panel {
+    padding: 0.9rem;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(10, 94, 207, 0.08);
+    box-shadow: 0 16px 36px rgba(23, 50, 77, 0.08);
+}
+
+.visitas-calendar-input {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.calendar-panel .flatpickr-calendar.inline {
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none;
+    border: 0;
+    background: transparent;
+}
+
+.calendar-panel .flatpickr-days,
+.calendar-panel .dayContainer {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.calendar-panel .flatpickr-day.has-visit {
+    position: relative;
+    font-weight: 800;
+    color: #0a5ecf;
+    background: rgba(65, 183, 255, 0.18);
+    border-color: rgba(10, 94, 207, 0.22);
+}
+
+.calendar-panel .flatpickr-day.has-visit::after {
+    content: '';
+    width: 0.34rem;
+    height: 0.34rem;
+    border-radius: 50%;
+    background: #01bc62;
+    position: absolute;
+    bottom: 0.18rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.visit-day-item {
+    align-items: center;
+}
+

@@ -172,7 +172,7 @@ function carregarAmigos(poloId) {
         let html = '';
         for (let i = 0; i < result.rows.length; i += 1) {
             const row = result.rows.item(i);
-            html += '<div class="friend-list-item">';
+            html += '<div class="friend-list-item" role="button" tabindex="0" onclick="verDetalhesAmigo(' + row.id + ')" onkeydown="if(event.key===\'Enter\' || event.key===\' \' ){ verDetalhesAmigo(' + row.id + '); }">';
             html += '<div class="friend-list-main">';
             html += '<div class="friend-name">' + escapeHtml(row.nome) + '</div>';
             html += '<div class="friend-meta">Apresentado por: ' + escapeHtml(row.nome_polo || 'Sem vinculo') + '</div>';
@@ -181,7 +181,7 @@ function carregarAmigos(poloId) {
             }
             html += '</div>';
             html += '<div class="friend-actions">';
-            html += '<button type="button" class="btn btn-sm btn-outline-info" onclick="editarAmigo(' + row.id + ')">Editar</button>';
+            html += '<button type="button" class="btn btn-sm btn-outline-info" onclick="event.stopPropagation(); editarAmigo(' + row.id + ')">Editar</button>';
             html += '<button type="button" class="btn btn-sm btn-outline-danger" data-nome="' + escapeHtml(row.nome).replace(/"/g, '&quot;') + '" onclick="removerAmigo(' + row.id + ', this.dataset.nome)">Excluir</button>';
             html += '</div></div>';
         }
@@ -237,6 +237,88 @@ function abrirAmigosDoPolo(poloId) {
     amigoListFilterPoloId = poloId || null;
     navigateTo('screen-amigos-list', { force: true });
     carregarAmigos(poloId);
+}
+function editarAmigo(amigoId) {
+    if (!amigoId) return;
+    runSql('SELECT id, polo_id, nome, telefone, endereco, data_nascimento, observacoes FROM amigos WHERE id = ? LIMIT 1', [amigoId]).then(function(result) {
+        if (!result.rows || !result.rows.length) {
+            showToast('Amigo nao encontrado');
+            return;
+        }
+        const amigo = result.rows.item(0);
+        navigateTo('screen-cadastro-amigo', { force: true });
+        initializeAmigoForm(amigo.polo_id);
+        const form = document.getElementById('formNovoAmigo');
+        if (form) {
+            form.dataset.editingId = String(amigo.id);
+        }
+        const nomeInput = document.getElementById('amigoNome');
+        const telefoneInput = document.getElementById('amigoTelefone');
+        const obsInput = document.getElementById('amigoObs');
+        if (nomeInput) nomeInput.value = amigo.nome || '';
+        if (telefoneInput) telefoneInput.value = amigo.telefone || '';
+        if (obsInput) obsInput.value = amigo.observacoes || '';
+        const submitBtn = document.querySelector('#formNovoAmigo button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = 'Salvar Alteracoes do Amigo';
+    }).catch(function(err) {
+        console.error('Erro ao carregar amigo para edicao', err);
+        showFriendlyError('salvar-amigo');
+    });
+}
+function verDetalhesAmigo(amigoId) {
+    if (!amigoId) return;
+    const target = document.getElementById('screen-amigo-detalhes');
+    if (target) {
+        target.setAttribute('data-amigo-id', String(amigoId));
+    }
+    navigateTo('screen-amigo-detalhes', { force: true });
+    renderAmigoDetails();
+}
+function renderAmigoDetails() {
+    const container = document.getElementById('amigoDetalhesContent');
+    if (!container) return;
+    const screen = document.getElementById('screen-amigo-detalhes');
+    const amigoId = screen ? screen.getAttribute('data-amigo-id') : '';
+    if (!amigoId) {
+        container.innerHTML = '<div class="alert alert-warning mb-0">Selecione um amigo primeiro.</div>';
+        return;
+    }
+    showSpinner();
+    runSql(
+        'SELECT a.id, a.nome, a.telefone, a.endereco, a.data_nascimento, a.observacoes, a.ultima_visita, p.nome AS nome_polo ' +
+        'FROM amigos a LEFT JOIN polos p ON a.polo_id = p.id WHERE a.id = ? LIMIT 1',
+        [amigoId]
+    ).then(function(result) {
+        if (!result.rows || !result.rows.length) {
+            container.innerHTML = '<div class="alert alert-warning mb-0">Amigo nao encontrado.</div>';
+            hideSpinner();
+            return;
+        }
+        const row = result.rows.item(0);
+        const html = [];
+        html.push('<div class="detail-panel">');
+        html.push('<div class="detail-row"><span class="detail-label">Nome</span><span class="detail-value">' + escapeHtml(row.nome || '') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Polo de Origem</span><span class="detail-value">' + escapeHtml(row.nome_polo || 'Sem vinculo') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Telefone</span><span class="detail-value">' + escapeHtml(row.telefone || 'Nao informado') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Endereco</span><span class="detail-value">' + escapeHtml(row.endereco || 'Nao informado') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Data de Nascimento</span><span class="detail-value">' + escapeHtml(row.data_nascimento || 'Nao informado') + '</span></div>');
+        html.push('<div class="detail-row"><span class="detail-label">Ultima Visita</span><span class="detail-value-inline-action">');
+        html.push('<span class="detail-value">' + escapeHtml(row.ultima_visita || 'Sem registros') + '</span>');
+        html.push('<button type="button" class="btn btn-sm btn-outline-primary" onclick="abrirCadastroVisitaDoDia(null, \"AMIGOS:' + row.id + '\")">Agendar Visita</button>');
+        html.push('</span></div>');
+        if (row.observacoes) {
+            html.push('<div class="detail-row detail-row-stack"><span class="detail-label">Observacoes</span><span class="detail-value">' + escapeHtml(row.observacoes) + '</span></div>');
+        }
+        html.push('</div>');
+        html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="editarAmigo(' + row.id + ')">Editar Amigo</button>');
+        html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-amigos-list\', { force: true, replace: true })">Voltar para Amigos</button>');
+        container.innerHTML = html.join('');
+        hideSpinner();
+    }).catch(function(err) {
+        console.error('Erro ao carregar detalhes do amigo', err);
+        container.innerHTML = '<div class="alert alert-danger mb-0">Erro ao carregar detalhes do amigo.</div>';
+        hideSpinner();
+    });
 }
 function salvarNovoAmigo() {
     const form = document.getElementById('formNovoAmigo');
@@ -302,13 +384,14 @@ function abrirCadastroPolo() {
         form.reset();
         delete form.dataset.editingId;
     }
+    togglePoloEditFields(false);
     const submitBtn = document.querySelector('#formNovoPolo button[type="submit"]');
     if (submitBtn) submitBtn.textContent = 'Salvar Polo';
     setPoloPhotoPreview('');
 }
 function editarPolo(poloId) {
     if (!poloId) return;
-    runSql('SELECT id, nome, telefone, observacoes, foto FROM polos WHERE id = ? LIMIT 1', [poloId]).then(function(result) {
+    runSql('SELECT id, nome, telefone, endereco, data_nascimento, observacoes, foto FROM polos WHERE id = ? LIMIT 1', [poloId]).then(function(result) {
         if (!result.rows || !result.rows.length) {
             showToast('Polo nao encontrado');
             return;
@@ -319,8 +402,19 @@ function editarPolo(poloId) {
         if (form) {
             form.dataset.editingId = String(polo.id);
         }
+        togglePoloEditFields(true);
         document.getElementById('poloNome').value = polo.nome || '';
         document.getElementById('poloTelefone').value = polo.telefone || '';
+        const enderecoInput = document.getElementById('poloEndereco');
+        if (enderecoInput) enderecoInput.value = polo.endereco || '';
+        const dataNascimentoInput = document.getElementById('poloDataNascimento');
+        if (dataNascimentoInput) {
+            if (dataNascimentoInput._flatpickr) {
+                dataNascimentoInput._flatpickr.setDate(polo.data_nascimento || '', false, 'Y-m-d');
+            } else {
+                dataNascimentoInput.value = polo.data_nascimento || '';
+            }
+        }
         document.getElementById('poloObs').value = polo.observacoes || '';
         document.getElementById('poloFoto').value = polo.foto || '';
         setPoloPhotoPreview(polo.foto || '');
@@ -336,8 +430,8 @@ function inserirNovoPolo() {
     const editingId = form ? form.dataset.editingId : '';
     const nome = (document.getElementById('poloNome') || {}).value || '';
     const telefone = (document.getElementById('poloTelefone') || {}).value || '';
-    const endereco = '';
-    const data_nascimento = '';
+    const endereco = (document.getElementById('poloEndereco') || {}).value || '';
+    const data_nascimento = (document.getElementById('poloDataNascimento') || {}).value || '';
     const observacoes = (document.getElementById('poloObs') || {}).value || '';
     const foto = (document.getElementById('poloFoto') || {}).value || '';
     if (!nome.trim()) {
@@ -352,6 +446,7 @@ function inserirNovoPolo() {
             form.reset();
             delete form.dataset.editingId;
         }
+        togglePoloEditFields(false);
         setPoloPhotoPreview('');
         showToast(editingId ? 'Polo atualizado com sucesso!' : 'Salvo com sucesso!');
         navigateTo('screen-polos-grid', { force: true, replace: true });
@@ -394,11 +489,41 @@ function setPoloPhotoPreview(src) {
         wrap.style.display = 'none';
     }
 }
+function togglePoloEditFields(show) {
+    const fields = document.querySelectorAll('.polo-edit-only');
+    for (let i = 0; i < fields.length; i += 1) {
+        if (show) {
+            fields[i].classList.remove('d-none');
+        } else {
+            fields[i].classList.add('d-none');
+        }
+    }
+    const screen = document.getElementById('screen-cadastro-polo');
+    if (screen) {
+        screen.setAttribute('data-title', show ? 'Editar Polo' : 'Novo Polo');
+    }
+    const title = document.getElementById('page-title');
+    if (show && title && currentScreen === 'screen-cadastro-polo') {
+        title.textContent = 'Editar Polo';
+    }
+}
 function initializePoloForm() {
     const telefoneInput = document.getElementById('poloTelefone');
     if (telefoneInput && !telefoneInput.dataset.bound) {
         telefoneInput.dataset.bound = 'true';
         telefoneInput.addEventListener('input', formatPhoneInput);
+    }
+    const dataNascimentoInput = document.getElementById('poloDataNascimento');
+    if (dataNascimentoInput && typeof flatpickr === 'function' && !dataNascimentoInput.dataset.flatpickrReady) {
+        dataNascimentoInput.dataset.flatpickrReady = 'true';
+        flatpickr(dataNascimentoInput, {
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd/m/Y',
+            allowInput: true,
+            locale: FLATPICKR_PT_BR,
+            position: 'auto bottom'
+        });
     }
     const photoInput = document.getElementById('poloFotoFile');
     if (photoInput && !photoInput.dataset.bound) {

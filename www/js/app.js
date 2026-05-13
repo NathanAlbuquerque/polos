@@ -98,8 +98,10 @@ function navigateTo(screenId, opts) {
         if (screenId === 'screen-cadastro-amigo') initializeAmigoForm();
         if (screenId === 'screen-amigos-list') carregarAmigos();
         if (screenId === 'visitas') initializeVisitCalendar();
+        if (screenId === 'visitas') renderProximasVisitas();
         if (screenId === 'screen-visitas-dia') renderVisitasDoDia(selectedVisitDate);
         if (screenId === 'screen-cadastro-visita-dia') initializeVisitForm(selectedVisitPerson);
+        if (screenId === 'screen-amigo-detalhes') renderAmigoDetails();
         if (screenId === 'tarefas') {
             initializeTaskForm(selectedTaskPerson);
             renderTarefas();
@@ -128,6 +130,7 @@ function showScreen(oldId) {
         'screen-polo-detalhes': 'screen-polo-detalhes',
         'screen-cadastro-amigo': 'screen-cadastro-amigo',
         'screen-amigos-list': 'screen-amigos-list',
+        'screen-amigo-detalhes': 'screen-amigo-detalhes',
         'screen-visitas-dia': 'screen-visitas-dia',
         'screen-cadastro-visita-dia': 'screen-cadastro-visita-dia',
         'screen-visita-detalhes': 'screen-visita-detalhes',
@@ -416,7 +419,51 @@ function inserirDadosTeste() {
                         [poloIds[amigo.poloIndex], amigo.nome, amigo.telefone, amigo.data_nascimento, amigo.observacoes]
                     );
                 });
-            }, Promise.resolve());
+            }, Promise.resolve()).then(function() {
+                return runSql('SELECT id, polo_id FROM amigos ORDER BY id ASC');
+            }).then(function(amigosResult) {
+                const amigosIds = [];
+
+                for (let index = 0; index < amigosResult.rows.length; index += 1) {
+                    amigosIds.push(amigosResult.rows.item(index));
+                }
+
+                const today = new Date();
+                const isoOffset = function(days) {
+                    const nextDate = new Date(today.getTime());
+                    nextDate.setDate(nextDate.getDate() + days);
+                    const month = String(nextDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(nextDate.getDate()).padStart(2, '0');
+                    return nextDate.getFullYear() + '-' + month + '-' + day;
+                };
+
+                const visitasTeste = [
+                    { pessoa: 'POLOS:' + poloIds[0], motivo: 'Visita de alinhamento', data: isoOffset(2), observacoes: 'Primeira reunião de acompanhamento' },
+                    { pessoa: 'POLOS:' + poloIds[1], motivo: 'Acompanhamento semanal', data: isoOffset(5), observacoes: 'Reforcar agenda e proximos passos' },
+                    { pessoa: 'AMIGOS:' + amigosIds[0].id, motivo: 'Visita de relacionamento', data: isoOffset(-1), observacoes: 'Contato de rotina com a rede' },
+                    { pessoa: 'AMIGOS:' + amigosIds[3].id, motivo: 'Visita programada', data: isoOffset(7), observacoes: 'Visita para fortalecer parceria' }
+                ];
+
+                const tarefasTeste = [
+                    { pessoa: 'POLOS:' + poloIds[0], titulo: 'Ligar para novo Polo', descricao: 'Confirmar disponibilidade para a visita', data: isoOffset(1) },
+                    { pessoa: 'AMIGOS:' + amigosIds[1].id, titulo: 'Enviar mensagem de acompanhamento', descricao: 'Reforcar contato apos a ultima conversa', data: isoOffset(3) },
+                    { pessoa: 'POLOS:' + poloIds[1], titulo: 'Organizar material da visita', descricao: 'Separar materiais de apoio e registro', data: isoOffset(6) }
+                ];
+
+                return visitasTeste.reduce(function(chain, visita) {
+                    return chain.then(function() {
+                        const parts = visita.pessoa.split(':');
+                        return runSql('INSERT INTO visitas (pessoa_id, tipo_pessoa, motivo, data_visita, observacoes) VALUES (?, ?, ?, ?, ?)', [parts[1], parts[0], visita.motivo, visita.data, visita.observacoes]);
+                    });
+                }, Promise.resolve()).then(function() {
+                    return tarefasTeste.reduce(function(chain, tarefa) {
+                        return chain.then(function() {
+                            const parts = tarefa.pessoa.split(':');
+                            return runSql('INSERT INTO tarefas (pessoa_id, tipo_pessoa, titulo, descricao, data_prazo, status) VALUES (?, ?, ?, ?, ?, ?)', [parts[1], parts[0], tarefa.titulo, tarefa.descricao, tarefa.data, 'Pendente']);
+                        });
+                    }, Promise.resolve());
+                });
+            });
         });
     });
 }

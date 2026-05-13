@@ -50,9 +50,9 @@ function carregarPessoasVisitadas(listId, selectedValue) {
         return result;
     });
 }
-function abrirCadastroVisitaDoDia(targetDate) {
+function abrirCadastroVisitaDoDia(targetDate, selectedPerson) {
     selectedVisitDate = targetDate || selectedVisitDate || getCurrentDate();
-    selectedVisitPerson = null;
+    selectedVisitPerson = selectedPerson || null;
     navigateTo('screen-cadastro-visita-dia', { force: true });
 }
 function selecionarDataVisita(targetDate) {
@@ -233,6 +233,37 @@ function renderVisitasDoDia(targetDate) {
         console.error('Erro ao carregar visitas do dia', err);
         container.innerHTML = '<div class="friend-list-item text-danger">Erro ao carregar visitas.</div>';
         hideSpinner();
+    });
+}
+function renderProximasVisitas() {
+    const container = document.getElementById('proximasVisitasList');
+    if (!container) return;
+    const today = getCurrentDate();
+    runSql(
+        'SELECT v.id, v.tipo_pessoa, v.pessoa_id, v.motivo, v.data_visita, COALESCE(p.nome, a.nome) AS pessoa_nome ' +
+        'FROM visitas v ' +
+        'LEFT JOIN polos p ON v.tipo_pessoa = "POLOS" AND p.id = v.pessoa_id ' +
+        'LEFT JOIN amigos a ON v.tipo_pessoa = "AMIGOS" AND a.id = v.pessoa_id ' +
+        'WHERE v.data_visita >= ? ' +
+        'ORDER BY v.data_visita ASC, v.id DESC LIMIT 5',
+        [today]
+    ).then(function(result) {
+        let html = '';
+        for (let i = 0; i < result.rows.length; i += 1) {
+            const row = result.rows.item(i);
+            html += '<div class="friend-list-item visit-upcoming-item">';
+            html += '<div class="friend-list-main">';
+            html += '<div class="visit-upcoming-date">' + escapeHtml(formatDateBr(row.data_visita || '')) + '</div>';
+            html += '<div class="visit-upcoming-title">' + escapeHtml(row.motivo || 'Visita sem titulo') + '</div>';
+            html += '<div class="visit-day-meta">' + escapeHtml(row.pessoa_nome || 'Sem vinculo') + ' - ' + escapeHtml(row.tipo_pessoa === 'POLOS' ? 'Polo' : 'Amigo') + '</div>';
+            html += '</div>';
+            html += '<div class="friend-actions"><button type="button" class="btn btn-sm btn-outline-primary" onclick="verDetalhesVisita(' + row.id + ')">Abrir</button></div>';
+            html += '</div>';
+        }
+        container.innerHTML = html || '<div class="friend-list-item text-muted">Nenhuma visita futura cadastrada.</div>';
+    }).catch(function(err) {
+        console.error('Erro ao carregar proximas visitas', err);
+        container.innerHTML = '<div class="friend-list-item text-danger">Erro ao carregar proximas visitas.</div>';
     });
 }
 function renderVisitas() {

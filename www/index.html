@@ -33,15 +33,15 @@
         </nav>
 
         <!-- Container Principal -->
-        <main style="padding-top: 70px; padding-bottom: 60px;">
+        <main style="padding-top: 30px; padding-bottom: 60px;">
 
             <!-- DASHBOARD -->
             <section id="screen-home" data-title="Dashboard" class="app-screen container py-4">
-                <div class="dashboard-summary mb-4">
+                <!-- <div class="dashboard-summary mb-4">
                     <p class="dashboard-kicker mb-2">Resumo rápido</p>
                     <h3 class="dashboard-headline mb-1">Veja o que exige atenção agora</h3>
                     <p id="dashboard-hint" class="dashboard-hint mb-0">Carregando indicadores do banco de dados...</p>
-                </div>
+                </div> -->
 
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
@@ -106,7 +106,7 @@
                 <div id="polosGrid" class="row g-3 mb-4">
                     <!-- Cards de Polos serão renderizados aqui -->
                 </div>
-                <button class="btn btn-success w-100" onclick="navigateTo('screen-cadastro-polo')">
+                <button class="btn btn-success w-100" onclick="abrirCadastroPolo()">
                     <span class="app-button-icon me-1" aria-hidden="true">
                         <svg viewBox="0 0 24 24" role="presentation" focusable="false"><path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/></svg>
                     </span>
@@ -158,7 +158,14 @@
                     </div>
                     <div class="mb-3">
                         <label for="poloFoto" class="form-label">Foto</label>
-                        <input type="text" class="form-control" id="poloFoto">
+                        <input type="hidden" id="poloFoto">
+                        <input type="file" class="visually-hidden" id="poloFotoFile" accept="image/*">
+                        <button type="button" class="btn btn-outline-primary w-100 btn-photo-picker" onclick="triggerPoloPhotoPicker()">
+                            Escolher Foto
+                        </button>
+                        <div class="photo-preview-wrap mt-2" id="poloFotoPreviewWrap" style="display:none;">
+                            <img id="poloFotoPreview" class="photo-preview-img" alt="Pré-visualização da foto" loading="lazy" decoding="async">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="poloObs" class="form-label">Observações</label>
@@ -169,25 +176,48 @@
             </section>
 
             <!-- VISITAS -->
-            <section id="visitas" data-title="Visitas" class="app-screen d-none container py-4" style="display:none;">
+            <section id="visitas" data-title="Visitas" class="app-screen container py-4" style="display:none;">
                 <div class="section-panel mb-3">
-                    <h3 class="section-title mb-1">Registrar visita</h3>
-                    <p class="section-subtitle mb-0">Escolha quem foi visitado e use a data dinâmica em português.</p>
+                    <h3 class="section-title mb-1">Calendário de visitas</h3>
+                    <p class="section-subtitle mb-0">Dias com visitas aparecem marcados. Toque em um dia para abrir a lista.</p>
+                </div>
+                <div class="calendar-panel mb-3">
+                    <input type="text" id="visitasCalendar" class="visitas-calendar-input" aria-label="Calendário de visitas">
+                </div>
+                <div class="section-panel mb-3">
+                    <p class="section-subtitle mb-0">Dica: você também pode abrir a data de hoje e registrar uma visita rapidamente.</p>
+                </div>
+                <button type="button" class="btn btn-success w-100" onclick="abrirCadastroVisitaDoDia()">Cadastrar Visita Hoje</button>
+            </section>
+
+            <section id="screen-visitas-dia" data-title="Visitas do Dia" class="app-screen container py-4" style="display:none;">
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1" id="visitasDiaTitulo">Visitas do dia</h3>
+                    <p class="section-subtitle mb-0">Lista de visitas da data selecionada.</p>
+                </div>
+                <div id="visitasDiaList" class="list-group list-group-flush mb-4"></div>
+                <button type="button" class="btn btn-success w-100" onclick="abrirCadastroVisitaDoDia()">Cadastrar Nova Visita</button>
+            </section>
+
+            <section id="screen-cadastro-visita-dia" data-title="Nova Visita" class="app-screen container py-4" style="display:none;">
+                <div class="section-panel mb-3">
+                    <h3 class="section-title mb-1" id="cadastroVisitaTitulo">Nova visita</h3>
+                    <p class="section-subtitle mb-0">Preencha os dados da visita do dia selecionado.</p>
                 </div>
                 <form id="formNovoVisita" class="mb-4">
                     <div class="mb-3">
-                        <label for="visitaPessoa" class="form-label">Pessoa Visitada *</label>
-                        <select class="form-select" id="visitaPessoa" required>
-                            <option value="">Selecione a pessoa</option>
-                        </select>
+                        <label for="visitaDataExibicao" class="form-label">Data</label>
+                        <input type="text" class="form-control" id="visitaDataExibicao" readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="visitaMotivo" class="form-label">Motivo</label>
-                        <input type="text" class="form-control" id="visitaMotivo">
+                        <label for="visitaPessoaBusca" class="form-label">Pessoa Visitada *</label>
+                        <input type="search" class="form-control" id="visitaPessoaBusca" placeholder="Digite para buscar pessoas" list="visitaPessoaLista" autocomplete="off" required>
+                        <datalist id="visitaPessoaLista"></datalist>
+                        <input type="hidden" id="visitaPessoa" value="">
                     </div>
                     <div class="mb-3">
-                        <label for="visitaData" class="form-label">Data da Visita *</label>
-                        <input type="text" class="form-control flatpickr-date" id="visitaData" placeholder="DD/MM/AAAA" autocomplete="off" required>
+                        <label for="visitaMotivo" class="form-label">Motivo da Visita *</label>
+                        <input type="text" class="form-control" id="visitaMotivo" required>
                     </div>
                     <div class="mb-3">
                         <label for="visitaObs" class="form-label">Observações</label>
@@ -195,13 +225,6 @@
                     </div>
                     <button type="submit" class="btn btn-success w-100">Salvar Visita</button>
                 </form>
-                <div class="section-panel mb-3">
-                    <h3 class="section-title mb-1">Histórico de visitas</h3>
-                    <p class="section-subtitle mb-0">Toque em uma visita para ver detalhes e gerar uma tarefa.</p>
-                </div>
-                <div id="visitasList" class="list-group mb-4">
-                    <!-- Visitas serão renderizadas aqui -->
-                </div>
             </section>
 
             <!-- DETALHES DA VISITA -->
@@ -210,7 +233,7 @@
             </section>
 
             <!-- TAREFAS -->
-            <section id="tarefas" data-title="Tarefas" class="app-screen d-none container py-4" style="display:none;">
+            <section id="tarefas" data-title="Tarefas" class="app-screen container py-4" style="display:none;">
                 <div class="section-panel mb-3">
                     <h3 class="section-title mb-1">Registrar tarefa</h3>
                     <p class="section-subtitle mb-0">Acompanhe prazos e conclua com um toque.</p>

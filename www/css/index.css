@@ -187,11 +187,6 @@ textarea.form-control {
     fill: currentColor;
 }
 
-.friend-form-note {
-    color: var(--app-muted);
-    font-size: 0.86rem;
-}
-
 .polo-card {
     display: flex;
     flex-direction: column;
@@ -515,7 +510,8 @@ textarea.form-control {
 }
 
 .dashboard-card-label {
-    font-size: 0.9rem;
+    font-size: 1rem;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0.92;
@@ -530,7 +526,8 @@ textarea.form-control {
 
 .dashboard-card-footnote {
     margin-top: auto;
-    font-size: 0.92rem;
+    font-size: 1rem;
+    font-weight: 700;
     opacity: 0.9;
 }
 
@@ -620,7 +617,7 @@ textarea.form-control {
 
 .polo-card-name {
     color: #0a5ecf;
-    font-size: 1rem;
+    font-size: 1.08rem;
     font-weight: 800;
     line-height: 1.2;
 }
@@ -628,8 +625,8 @@ textarea.form-control {
 .polo-card-meta {
     margin-top: 0.2rem;
     color: #6b7f93;
-    font-size: 0.82rem;
-    font-weight: 600;
+    font-size: 0.92rem;
+    font-weight: 700;
 }
 
 .polo-detail-hero {
@@ -707,6 +704,13 @@ textarea.form-control {
     text-align: right;
 }
 
+.detail-value-inline-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.45rem;
+}
+
 .detail-row-stack .detail-value {
     display: block;
     margin-top: 0.2rem;
@@ -757,14 +761,82 @@ textarea.form-control {
     font-size: 0.95rem;
 }
 
-.dashboard-card,
-.dashboard-card * {
-    font-size: inherit;
-}
-
 .btn-photo-picker {
     border-style: dashed;
     border-width: 2px;
+}
+
+.btn-outline-info {
+    color: #08449b;
+    border-color: #08449b;
+    border-width: 2px;
+}
+
+.btn-outline-info:hover,
+.btn-outline-info:focus,
+.btn-outline-info:active {
+    color: #fff;
+    background-color: #08449b;
+    border-color: #08449b;
+}
+
+.btn-outline-info:focus {
+    box-shadow: 0 0 0 0.2rem rgba(8, 68, 155, 0.2);
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+}
+
+.polo-edit-only {
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.visit-day-item {
+    align-items: center;
+}
+
+.visit-upcoming-item {
+    align-items: center;
+}
+
+.visit-upcoming-date {
+    color: var(--app-primary);
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.visit-upcoming-title {
+    color: var(--app-text);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 0.18rem;
+}
+
+.visit-day-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(65, 183, 255, 0.12);
+    color: var(--app-primary);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.visit-day-person {
+    color: var(--app-text);
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+.visit-day-meta {
+    color: var(--app-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-top: 0.18rem;
 }
 
 .photo-preview-wrap {

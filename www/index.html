@@ -140,7 +140,6 @@
                         <label for="amigoObs" class="form-label">Observações</label>
                         <textarea class="form-control" id="amigoObs" rows="3"></textarea>
                     </div>
-                    <p class="friend-form-note mb-3">O amigo sempre fica vinculado a um Polo para manter a hierarquia da rede.</p>
                     <button type="submit" class="btn btn-primary w-100">Salvar Amigo</button>
                 </form>
             </section>
@@ -156,7 +155,7 @@
                         <label for="poloTelefone" class="form-label">Telefone</label>
                         <input type="tel" class="form-control" id="poloTelefone" inputmode="numeric" autocomplete="tel">
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 polo-edit-only d-none">
                         <label for="poloFoto" class="form-label">Foto</label>
                         <input type="hidden" id="poloFoto">
                         <input type="file" class="visually-hidden" id="poloFotoFile" accept="image/*">
@@ -167,7 +166,15 @@
                             <img id="poloFotoPreview" class="photo-preview-img" alt="Pré-visualização da foto" loading="lazy" decoding="async">
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 polo-edit-only d-none">
+                        <label for="poloEndereco" class="form-label">Endereco</label>
+                        <input type="text" class="form-control" id="poloEndereco">
+                    </div>
+                    <div class="mb-3 polo-edit-only d-none">
+                        <label for="poloDataNascimento" class="form-label">Data de Nascimento</label>
+                        <input type="text" class="form-control flatpickr-date" id="poloDataNascimento" placeholder="DD/MM/AAAA" autocomplete="off">
+                    </div>
+                    <div class="mb-3 polo-edit-only d-none">
                         <label for="poloObs" class="form-label">Observações</label>
                         <textarea class="form-control" id="poloObs" rows="3"></textarea>
                     </div>
@@ -184,16 +191,17 @@
                 <div class="calendar-panel mb-3">
                     <input type="text" id="visitasCalendar" class="visitas-calendar-input" aria-label="Calendário de visitas">
                 </div>
-                <div class="section-panel mb-3">
-                    <p class="section-subtitle mb-0">Dica: você também pode abrir a data de hoje e registrar uma visita rapidamente.</p>
-                </div>
                 <button type="button" class="btn btn-success w-100" onclick="abrirCadastroVisitaDoDia()">Cadastrar Visita Hoje</button>
+                <div class="section-panel mt-3 mb-3">
+                    <h3 class="section-title mb-1">Proximas Visitas</h3>
+                    <p class="section-subtitle mb-0">Visao rapida das proximas visitas cadastradas.</p>
+                </div>
+                <div id="proximasVisitasList" class="list-group list-group-flush mb-0"></div>
             </section>
 
             <section id="screen-visitas-dia" data-title="Visitas do Dia" class="app-screen container py-4" style="display:none;">
                 <div class="section-panel mb-3">
                     <h3 class="section-title mb-1" id="visitasDiaTitulo">Visitas do dia</h3>
-                    <p class="section-subtitle mb-0">Lista de visitas da data selecionada.</p>
                 </div>
                 <div id="visitasDiaList" class="list-group list-group-flush mb-4"></div>
                 <button type="button" class="btn btn-success w-100" onclick="abrirCadastroVisitaDoDia()">Cadastrar Nova Visita</button>
@@ -230,6 +238,11 @@
             <!-- DETALHES DA VISITA -->
             <section id="screen-visita-detalhes" data-title="Detalhes da Visita" class="app-screen container py-4" style="display:none;">
                 <div id="visitaDetalhesContent"></div>
+            </section>
+
+            <!-- DETALHES DO AMIGO -->
+            <section id="screen-amigo-detalhes" data-title="Detalhes do Amigo" class="app-screen container py-4" style="display:none;">
+                <div id="amigoDetalhesContent"></div>
             </section>
 
             <!-- TAREFAS -->

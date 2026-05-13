@@ -10,6 +10,7 @@ let selectedVisitPerson = null;
 let selectedTaskPerson = null;
 let selectedVisitId = null;
 let taskPrefill = null;
+let selectedVisitDate = null;
 
 const FLATPICKR_PT_BR = {
     weekdays: {
@@ -96,10 +97,9 @@ function navigateTo(screenId, opts) {
         if (screenId === 'screen-polo-detalhes') renderPoloDetails();
         if (screenId === 'screen-cadastro-amigo') initializeAmigoForm();
         if (screenId === 'screen-amigos-list') carregarAmigos();
-        if (screenId === 'visitas') {
-            initializeVisitForm(selectedVisitPerson);
-            renderVisitas();
-        }
+        if (screenId === 'visitas') initializeVisitCalendar();
+        if (screenId === 'screen-visitas-dia') renderVisitasDoDia(selectedVisitDate);
+        if (screenId === 'screen-cadastro-visita-dia') initializeVisitForm(selectedVisitPerson);
         if (screenId === 'tarefas') {
             initializeTaskForm(selectedTaskPerson);
             renderTarefas();
@@ -128,6 +128,8 @@ function showScreen(oldId) {
         'screen-polo-detalhes': 'screen-polo-detalhes',
         'screen-cadastro-amigo': 'screen-cadastro-amigo',
         'screen-amigos-list': 'screen-amigos-list',
+        'screen-visitas-dia': 'screen-visitas-dia',
+        'screen-cadastro-visita-dia': 'screen-cadastro-visita-dia',
         'screen-visita-detalhes': 'screen-visita-detalhes',
         'newVisita': 'visitas',
         'newTarefa': 'tarefas'
@@ -150,9 +152,9 @@ function MapsTo(screenId, area) {
 
     if (area === 'VISITAS') {
         selectedVisitPerson = null;
+        selectedVisitDate = null;
         navigateTo(screenId, { force: true });
-        initializeVisitForm();
-        renderVisitas();
+        initializeVisitCalendar();
         return;
     }
 

@@ -449,10 +449,23 @@ function renderTarefas() {
     const container = document.getElementById('tarefasList');
     if (!container) return;
     showSpinner();
-    runSql(
-        'SELECT id, pessoa_id, tipo_pessoa, titulo, descricao, data_prazo, status ' +
-        'FROM tarefas ORDER BY CASE WHEN status = "Pendente" THEN 0 ELSE 1 END, data_prazo ASC, id DESC'
-    ).then(function(result) {
+    // apply simple filters from UI (status and search)
+    const statusFilter = (document.getElementById('tarefaFiltroStatus') || {}).value || '';
+    const buscaFilter = (document.getElementById('tarefaFiltroBusca') || {}).value || '';
+    let sql = 'SELECT id, pessoa_id, tipo_pessoa, titulo, descricao, data_prazo, status FROM tarefas';
+    const params = [];
+    const where = [];
+    if (statusFilter) {
+        where.push('status = ?');
+        params.push(statusFilter);
+    }
+    if (buscaFilter) {
+        where.push('(titulo LIKE ? OR descricao LIKE ?)');
+        params.push('%' + buscaFilter + '%', '%' + buscaFilter + '%');
+    }
+    if (where.length) sql += ' WHERE ' + where.join(' AND ');
+    sql += ' ORDER BY CASE WHEN status = "Pendente" THEN 0 ELSE 1 END, data_prazo ASC, id DESC';
+    runSql(sql, params).then(function(result) {
         let html = '';
         const today = getCurrentDate();
         for (let i = 0; i < result.rows.length; i += 1) {

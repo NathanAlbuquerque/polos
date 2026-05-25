@@ -39,6 +39,11 @@ function onDeviceReady() {
     initializeDatabase();
     initializePoloForm();
 
+    const tarefaFiltro = document.getElementById('tarefaFiltroStatus');
+    if (tarefaFiltro) tarefaFiltro.addEventListener('change', function() { if (currentScreen === 'tarefas') renderTarefas(); });
+    const tarefaBusca = document.getElementById('tarefaFiltroBusca');
+    if (tarefaBusca) tarefaBusca.addEventListener('input', function() { if (currentScreen === 'tarefas') renderTarefas(); });
+
     const form = document.getElementById('formNovoPolo');
     if (form) {
         form.addEventListener('submit', function(ev) {
@@ -103,8 +108,10 @@ function navigateTo(screenId, opts) {
         if (screenId === 'screen-cadastro-visita-dia') initializeVisitForm(selectedVisitPerson);
         if (screenId === 'screen-amigo-detalhes') renderAmigoDetails();
         if (screenId === 'tarefas') {
-            initializeTaskForm(selectedTaskPerson);
             renderTarefas();
+        }
+        if (screenId === 'screen-cadastro-tarefa') {
+            initializeTaskForm(selectedTaskPerson);
         }
         if (screenId === 'screen-home') updateCounts();
     }
@@ -195,6 +202,7 @@ function initializeDatabase() {
             console.log('Banco de dados inicializado com sucesso');
             renderPolos();
             atualizarDashboard();
+            try { scheduleNotifications(); } catch (e) { console.warn('Scheduling notifications failed', e); }
         })
         .catch(function(error) {
             console.error('Erro ao inicializar banco de dados', error);
@@ -535,6 +543,54 @@ function formatPhoneInput(event) {
     input.value = digits.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, function(_, ddd, prefixo, sufixo) {
         return '(' + ddd + ') ' + prefixo + (sufixo ? '-' + sufixo : '');
     });
+}
+
+function scheduleNotifications() {
+    if (!window.cordova || !window.cordova.plugins || !window.cordova.plugins.notification || !window.cordova.plugins.notification.local) {
+        console.info('Local notification plugin not available. To enable notifications, install cordova-plugin-local-notification.');
+        return;
+    }
+    // remove previously scheduled app notifications to avoid duplicates
+    try { cordova.plugins.notification.local.cancelAll(); } catch (e) { console.warn('Could not cancel existing notifications', e); }
+
+    const today = getCurrentDate();
+    // schedule notifications for visits and tarefas in the next 7 days
+    const params = [today];
+    runSql('SELECT id, motivo, data_visita, tipo_pessoa, pessoa_id FROM visitas WHERE data_visita >= ? ORDER BY data_visita ASC', [today])
+        .then(function(result) {
+            for (let i = 0; i < result.rows.length; i += 1) {
+                const row = result.rows.item(i);
+                scheduleNotificationForDate('visita-' + row.id, row.motivo || 'Visita agendada', row.data_visita);
+            }
+        }).catch(function(err) { console.warn('Erro ao ler visitas para notificar', err); });
+
+    runSql('SELECT id, titulo, data_prazo FROM tarefas WHERE data_prazo >= ? ORDER BY data_prazo ASC', [today])
+        .then(function(result) {
+            for (let i = 0; i < result.rows.length; i += 1) {
+                const row = result.rows.item(i);
+                scheduleNotificationForDate('tarefa-' + row.id, row.titulo || 'Tarefa com prazo', row.data_prazo);
+            }
+        }).catch(function(err) { console.warn('Erro ao ler tarefas para notificar', err); });
+}
+
+function scheduleNotificationForDate(id, text, isoDate) {
+    if (!isoDate) return;
+    // schedule at 08:00 local time on the given date
+    const parts = String(isoDate).split('-');
+    if (parts.length !== 3) return;
+    const dt = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 8, 0, 0, 0);
+    try {
+        cordova.plugins.notification.local.schedule({
+            id: id,
+            title: 'Lembrete',
+            text: text,
+            trigger: { at: dt },
+            foreground: true
+        });
+        console.log('Scheduled notification', id, dt);
+    } catch (e) {
+        console.warn('Failed to schedule notification', e);
+    }
 }
 
 console.log('app core carregado');

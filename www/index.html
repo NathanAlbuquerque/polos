@@ -37,6 +37,19 @@
 
             <!-- DASHBOARD -->
             <section id="screen-home" data-title="Dashboard" class="app-screen container py-4">
+                <div id="splashScreenOverlay" class="splash-overlay" style="display:none;">
+                    <div class="splash-inner">
+                        <img src="img/logo.png" alt="Logo" class="splash-logo">
+                        <div class="splash-progress-wrap">
+                            <div id="splashProgress" class="splash-progress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-total text-center mb-3">
+                    <div class="dashboard-total-label">Total</div>
+                    <div id="dash-total-count" class="dashboard-total-value">0</div>
+                </div>
                 <!-- <div class="dashboard-summary mb-4">
                     <p class="dashboard-kicker mb-2">Resumo rápido</p>
                     <h3 class="dashboard-headline mb-1">Veja o que exige atenção agora</h3>
@@ -240,7 +253,6 @@
                 <div class="section-panel mb-3 d-flex justify-content-between align-items-start">
                     <div>
                         <h3 class="section-title mb-1">Fila de tarefas</h3>
-                        <p class="section-subtitle mb-0">As concluídas ficam em verde e as pendentes vencidas em vermelho.</p>
                     </div>
                     <div class="text-end">
                         <button type="button" class="btn btn-primary" onclick="navigateTo('screen-cadastro-tarefa')">Nova Tarefa</button>

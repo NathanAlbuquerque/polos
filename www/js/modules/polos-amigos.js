@@ -75,8 +75,12 @@ function atualizarDashboard() {
         });
     })).then(function(values) {
         const hint = document.getElementById('dashboard-hint');
+        const totalEl = document.getElementById('dash-total-count');
+        const polosCount = Number(values[0] || 0);
+        const amigosCount = Number(values[1] || 0);
+        if (totalEl) totalEl.textContent = String(polosCount + amigosCount);
         if (hint) {
-            hint.textContent = 'Polos: ' + values[0] + ' | Amigos: ' + values[1] + ' | Visitas realizadas: ' + values[2] + ' | Visitas pendentes: ' + values[3] + ' | Tarefas pendentes: ' + values[4];
+            hint.textContent = 'Polos: ' + polosCount + ' | Amigos: ' + amigosCount + ' | Visitas realizadas: ' + values[2] + ' | Visitas pendentes: ' + values[3] + ' | Tarefas pendentes: ' + values[4];
         }
         return values;
     });
@@ -136,11 +140,10 @@ function renderPoloDetails() {
         }
         html.push('</div>');
         html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="abrirAmigosDoPolo(' + row.id + ')">Listar Amigos</button>');
-        html.push('<button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="abrirCadastroAmigo(' + row.id + ')">Adicionar Amigo</button>');
+        html.push('<button type="button" class="btn btn-info w-100 mb-2" onclick="abrirCadastroAmigo(' + row.id + ')">Adicionar Amigo</button>');
         html.push('<button type="button" class="btn btn-success w-100 mb-2" onclick="abrirCadastroVisitaDoDia(null, \u0027POLOS:' + row.id + '\u0027)">Agendar Visita</button>');
-        html.push('<button type="button" class="btn btn-outline-info w-100 mb-2" onclick="editarPolo(' + row.id + ')">Editar Polo</button>');
-        html.push('<button type="button" class="btn btn-outline-danger w-100 mb-2" onclick="deletarPolo(' + row.id + ', \'' + escapeHtml(row.nome).replace(/'/g, "\\'") + '\')">Deletar Polo</button>');
-        html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-polos-grid\', { replace: true })">Voltar para Polos</button>');
+        html.push('<button type="button" class="btn btn-warning w-100 mb-2" onclick="editarPolo(' + row.id + ')">Editar Polo</button>');
+        html.push('<button type="button" class="btn btn-danger w-100 mb-2" onclick="deletarPolo(' + row.id + ', \'' + escapeHtml(row.nome).replace(/'/g, "\\'") + '\')">Deletar Polo</button>');
         container.innerHTML = html.join('');
         hideSpinner();
     }).catch(function(err) {

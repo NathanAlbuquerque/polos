@@ -137,6 +137,7 @@ function renderPoloDetails() {
         html.push('</div>');
         html.push('<button type="button" class="btn btn-primary w-100 mb-2" onclick="abrirAmigosDoPolo(' + row.id + ')">Listar Amigos</button>');
         html.push('<button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="abrirCadastroAmigo(' + row.id + ')">Adicionar Amigo</button>');
+        html.push('<button type="button" class="btn btn-success w-100 mb-2" onclick="abrirCadastroVisitaDoDia(null, \u0027POLOS:' + row.id + '\u0027)">Agendar Visita</button>');
         html.push('<button type="button" class="btn btn-outline-info w-100 mb-2" onclick="editarPolo(' + row.id + ')">Editar Polo</button>');
         html.push('<button type="button" class="btn btn-outline-danger w-100 mb-2" onclick="deletarPolo(' + row.id + ', \'' + escapeHtml(row.nome).replace(/'/g, "\\'") + '\')">Deletar Polo</button>');
         html.push('<button type="button" class="btn btn-outline-secondary w-100" onclick="navigateTo(\'screen-polos-grid\', { replace: true })">Voltar para Polos</button>');

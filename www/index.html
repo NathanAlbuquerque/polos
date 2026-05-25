@@ -155,7 +155,7 @@
                         <label for="poloTelefone" class="form-label">Telefone</label>
                         <input type="tel" class="form-control" id="poloTelefone" inputmode="numeric" autocomplete="tel">
                     </div>
-                    <div class="mb-3 polo-edit-only d-none">
+                    <div class="mb-3">
                         <label for="poloFoto" class="form-label">Foto</label>
                         <input type="hidden" id="poloFoto">
                         <input type="file" class="visually-hidden" id="poloFotoFile" accept="image/*">
@@ -166,15 +166,7 @@
                             <img id="poloFotoPreview" class="photo-preview-img" alt="Pré-visualização da foto" loading="lazy" decoding="async">
                         </div>
                     </div>
-                    <div class="mb-3 polo-edit-only d-none">
-                        <label for="poloEndereco" class="form-label">Endereco</label>
-                        <input type="text" class="form-control" id="poloEndereco">
-                    </div>
-                    <div class="mb-3 polo-edit-only d-none">
-                        <label for="poloDataNascimento" class="form-label">Data de Nascimento</label>
-                        <input type="text" class="form-control flatpickr-date" id="poloDataNascimento" placeholder="DD/MM/AAAA" autocomplete="off">
-                    </div>
-                    <div class="mb-3 polo-edit-only d-none">
+                    <div class="mb-3">
                         <label for="poloObs" class="form-label">Observações</label>
                         <textarea class="form-control" id="poloObs" rows="3"></textarea>
                     </div>
@@ -186,15 +178,13 @@
             <section id="visitas" data-title="Visitas" class="app-screen container py-4" style="display:none;">
                 <div class="section-panel mb-3">
                     <h3 class="section-title mb-1">Calendário de visitas</h3>
-                    <p class="section-subtitle mb-0">Dias com visitas aparecem marcados. Toque em um dia para abrir a lista.</p>
                 </div>
                 <div class="calendar-panel mb-3">
                     <input type="text" id="visitasCalendar" class="visitas-calendar-input" aria-label="Calendário de visitas">
                 </div>
                 <button type="button" class="btn btn-success w-100" onclick="abrirCadastroVisitaDoDia()">Cadastrar Visita Hoje</button>
                 <div class="section-panel mt-3 mb-3">
-                    <h3 class="section-title mb-1">Proximas Visitas</h3>
-                    <p class="section-subtitle mb-0">Visao rapida das proximas visitas cadastradas.</p>
+                    <h3 class="section-title mb-1">Proximas Visitas:</h3>
                 </div>
                 <div id="proximasVisitasList" class="list-group list-group-flush mb-0"></div>
             </section>
@@ -245,8 +235,38 @@
                 <div id="amigoDetalhesContent"></div>
             </section>
 
-            <!-- TAREFAS -->
+            <!-- TAREFAS (lista + filtros) -->
             <section id="tarefas" data-title="Tarefas" class="app-screen container py-4" style="display:none;">
+                <div class="section-panel mb-3 d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="section-title mb-1">Fila de tarefas</h3>
+                        <p class="section-subtitle mb-0">As concluídas ficam em verde e as pendentes vencidas em vermelho.</p>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-primary" onclick="navigateTo('screen-cadastro-tarefa')">Nova Tarefa</button>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <select id="tarefaFiltroStatus" class="form-select">
+                            <option value="">Status: Todos</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Concluido">Concluido</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <input id="tarefaFiltroBusca" class="form-control" placeholder="Buscar por título ou descrição">
+                    </div>
+                </div>
+
+                <div id="tarefasList" class="list-group mb-4">
+                    <!-- Tarefas serão renderizadas aqui -->
+                </div>
+            </section>
+
+            <!-- TELA: CADASTRO DE TAREFA (separada) -->
+            <section id="screen-cadastro-tarefa" data-title="Nova Tarefa" class="app-screen container py-4" style="display:none;">
                 <div class="section-panel mb-3">
                     <h3 class="section-title mb-1">Registrar tarefa</h3>
                     <p class="section-subtitle mb-0">Acompanhe prazos e conclua com um toque.</p>
@@ -272,13 +292,6 @@
                     </div>
                     <button type="submit" class="btn btn-success w-100">Salvar Tarefa</button>
                 </form>
-                <div class="section-panel mb-3">
-                    <h3 class="section-title mb-1">Fila de tarefas</h3>
-                    <p class="section-subtitle mb-0">As concluídas ficam em verde e as pendentes vencidas em vermelho.</p>
-                </div>
-                <div id="tarefasList" class="list-group mb-4">
-                    <!-- Tarefas serão renderizadas aqui -->
-                </div>
             </section>
 
         </main>

@@ -456,6 +456,56 @@ textarea.form-control {
     text-transform: uppercase;
 }
 
+/* Dashboard total */
+.dashboard-total {
+    display: block;
+}
+.dashboard-total-label {
+    font-size: 0.95rem;
+    color: var(--app-muted);
+    font-weight: 700;
+}
+.dashboard-total-value {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--app-primary);
+    margin-top: 0.2rem;
+}
+
+/* Splash overlay */
+.splash-overlay {
+    position: fixed;
+    inset: 0px;
+    background: var(--app-surface-strong);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.splash-inner {
+    text-align: center;
+}
+.splash-logo {
+    width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto 18px auto;
+}
+.splash-progress-wrap {
+    width: 220px;
+    height: 10px;
+    background: rgba(23,50,77,0.06);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+.splash-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--app-primary), var(--app-primary-soft));
+    transition: width 300ms linear, background-color 200ms ease;
+}
+
 .dashboard-headline,
 .section-title {
     color: var(--app-text);

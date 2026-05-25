@@ -2,6 +2,9 @@
 // Core do SPA: estado, navegacao, banco e utilitarios compartilhados.
 
 document.addEventListener('deviceready', onDeviceReady, false);
+document.addEventListener('DOMContentLoaded', function() {
+    try { if (typeof showSplash === 'function') showSplash(); } catch (e) { /* ignore */ }
+}, false);
 
 let navigationHistory = ['screen-home'];
 let currentScreen = 'screen-home';
@@ -36,8 +39,9 @@ function onDeviceReady() {
     }
 
     applyNativeChrome();
-    initializeDatabase();
+    requestNotificationPermission();
     initializePoloForm();
+    initializeDatabase();
 
     const tarefaFiltro = document.getElementById('tarefaFiltroStatus');
     if (tarefaFiltro) tarefaFiltro.addEventListener('change', function() { if (currentScreen === 'tarefas') renderTarefas(); });
@@ -60,6 +64,7 @@ function onDeviceReady() {
     }, false);
 
     navigateTo('screen-home', { replace: true });
+    try { hideSplash(); } catch (e) { /* ignore */ }
 }
 
 function applyNativeChrome() {
@@ -543,6 +548,75 @@ function formatPhoneInput(event) {
     input.value = digits.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, function(_, ddd, prefixo, sufixo) {
         return '(' + ddd + ') ' + prefixo + (sufixo ? '-' + sufixo : '');
     });
+}
+
+// Splash screen helpers
+let __splashInterval = null;
+function showSplash() {
+    const overlay = document.getElementById('splashScreenOverlay');
+    const bar = document.getElementById('splashProgress');
+    if (!overlay || !bar) return;
+    overlay.style.display = 'flex';
+    try {
+        const styles = getComputedStyle(document.body);
+        __splashInterval = __splashInterval || startSplashProgress(bar, [styles.getPropertyValue('--app-primary'), styles.getPropertyValue('--app-primary-soft'), styles.getPropertyValue('--app-success')]);
+    } catch (e) {
+        __splashInterval = __splashInterval || startSplashProgress(bar, ['#0a5ecf', '#41b7ff', '#01bc62']);
+    }
+}
+
+function hideSplash() {
+    const overlay = document.getElementById('splashScreenOverlay');
+    const bar = document.getElementById('splashProgress');
+    if (bar) bar.style.width = '100%';
+    if (__splashInterval) { clearInterval(__splashInterval); __splashInterval = null; }
+    if (overlay) {
+        setTimeout(function() { overlay.style.display = 'none'; if (bar) bar.style.width = '0%'; }, 250);
+    }
+}
+
+function startSplashProgress(bar, colors) {
+    let progress = 0;
+    let colorIndex = 0;
+    bar.style.width = '0%';
+    bar.style.background = colors && colors.length ? colors[0] : '#0a5ecf';
+    return setInterval(function() {
+        progress += Math.floor(Math.random() * 8) + 4; // random progress
+        if (progress >= 96) progress = 96;
+        bar.style.width = progress + '%';
+        if (Math.random() < 0.35) {
+            colorIndex = (colorIndex + 1) % (colors.length || 1);
+            bar.style.background = colors[colorIndex] || bar.style.background;
+        }
+    }, 350);
+}
+
+// Request notification permission (cordova plugin or web fallback)
+function requestNotificationPermission() {
+    try {
+        if (window.cordova && cordova.plugins && cordova.plugins.notification && cordova.plugins.notification.local) {
+            // plugin API may expose hasPermission/requestPermission or similar
+            try {
+                cordova.plugins.notification.local.hasPermission(function(granted) {
+                    if (!granted && cordova.plugins.notification.local.requestPermission) {
+                        cordova.plugins.notification.local.requestPermission(function(result) {
+                            console.log('Local notification permission result:', result);
+                        });
+                    }
+                });
+            } catch (e) {
+                // try requestPermission directly
+                try { cordova.plugins.notification.local.requestPermission(); } catch (e2) { console.warn('Notification permission request failed', e2); }
+            }
+            return;
+        }
+    } catch (e) {
+        console.warn('Notification plugin check failed', e);
+    }
+    // Fallback web API
+    if (window.Notification && Notification.requestPermission) {
+        Notification.requestPermission().then(function(result) { console.log('Notification permission (web):', result); });
+    }
 }
 
 function scheduleNotifications() {
